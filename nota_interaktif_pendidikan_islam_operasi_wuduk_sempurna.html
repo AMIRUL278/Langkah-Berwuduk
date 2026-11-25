@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misi Khas MATA: Operasi Wuduk Sempurna</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js untuk Visual 3D Futuristik -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tone.js untuk Kesan Bunyi Futuristik MATA -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts: Orbitron (Futuristik) & Plus Jakarta Sans (Mesra Pembacaan Sekolah Rendah) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'sans': ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        mata: {
+                            dark: '#060B19',
+                            panel: '#0D1730',
+                            blue: '#00E5FF',
+                            deep: '#0284C7',
+                            red: '#FF2A4B',
+                            amber: '#FFB800'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'scanline': 'scanline 4s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #060B19;
+            color: #F8FAFC;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 30%, rgba(255, 42, 75, 0.08) 0%, transparent 45%),
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        /* Kesan Kaca & Bingkai Hologram MATA */
+        .mata-glass {
+            background: rgba(13, 23, 48, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.1), inset 0 0 15px rgba(0, 229, 255, 0.05);
+        }
+
+        .mata-card-red {
+            border-color: rgba(255, 42, 75, 0.4);
+            box-shadow: 0 0 25px rgba(255, 42, 75, 0.15), inset 0 0 15px rgba(255, 42, 75, 0.05);
+        }
+
+        .hud-corner {
+            position: relative;
+        }
+        .hud-corner::before, .hud-corner::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-color: #00E5FF;
+            border-style: solid;
+            pointer-events: none;
+        }
+        .hud-corner::before {
+            top: -1px; left: -1px;
+            border-width: 2px 0 0 2px;
+            border-top-left-radius: 12px;
+        }
+        .hud-corner::after {
+            bottom: -1px; right: -1px;
+            border-width: 0 2px 2px 0;
+            border-bottom-right-radius: 12px;
+        }
+
+        /* Butang Gaya MATA */
+        .btn-mata {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-mata:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+        .btn-mata:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn-mata-red:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(255, 42, 75, 0.6);
+        }
+
+        /* Kanvas 3D */
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            min-height: 360px;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+            background: radial-gradient(circle at center, #0F2347 0%, #050A17 100%);
+        }
+
+        /* Drag and Drop Styling */
+        .draggable-card {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            user-select: none;
+        }
+        .draggable-card:active {
+            cursor: grabbing;
+            transform: scale(1.02);
+        }
+        .drop-zone {
+            transition: all 0.25s ease;
+        }
+        .drop-zone.drag-over {
+            background-color: rgba(0, 229, 255, 0.15);
+            border-color: #00E5FF;
+            transform: scale(1.01);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060B19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284C7;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-mata-blue selection:text-mata-dark">
+
+    <!-- BAR NAVIGASI ATAS (HUD AKADEMI MATA) -->
+    <header class="sticky top-0 z-40 mata-glass border-b border-cyan-500/30 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Logo MATA & Tajuk -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('intro')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-mata-red to-red-800 flex items-center justify-center border border-red-400 shadow-lg shadow-red-500/30">
+                    <i class="fa-solid fa-shield-halved text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-orbitron font-bold text-xs tracking-widest text-mata-red uppercase">AKADEMI M.A.T.A</span>
+                        <span class="px-2 py-0.5 text-[10px] font-bold bg-cyan-500/20 text-mata-blue rounded-full border border-cyan-400/30">IRIS v4.0</span>
+                    </div>
+                    <h1 class="font-orbitron font-bold text-sm sm:text-base text-white tracking-wide">OPERASI WUDUK SEMPURNA</h1>
+                </div>
+            </div>
+
+            <!-- Penanda Kemajuan & Kawalan Pantas -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <div id="header-progress-container" class="hidden sm:flex items-center gap-3 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-cyan-500/20">
+                    <span class="text-xs font-semibold text-cyan-300">KEMAJUAN MISI:</span>
+                    <div class="w-28 h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
+                        <div id="header-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <span id="header-progress-text" class="font-orbitron text-xs font-bold text-white">0/6</span>
+                </div>
+
+                <button onclick="toggleAudioMute()" id="btn-mute" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 transition" title="Kesan Bunyi Sistem">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="navigateTo('intro')" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600/50 transition text-xs font-bold flex items-center gap-1.5" title="Menu Utama">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden md:inline">MENU</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- KANDUNGAN UTAMA DINAMIK -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- ===================================================================== -->
+        <!-- HALAMAN 1: HALAMAN PEMBUKAAN (MISI KHAS MATA)                         -->
+        <!-- ===================================================================== -->
+        <section id="view-intro" class="space-y-8 animate-fade-in">
+            <div class="mata-glass hud-corner rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+                <!-- Garis Imbasan Hologram -->
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent h-32 animate-scanline pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- Kolum Teks & Arahan Misi -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/15 border border-red-500/40 text-mata-red font-orbitron text-xs font-bold tracking-wider">
+                            <span class="w-2 h-2 rounded-full bg-mata-red animate-ping"></span>
+                            TAKLIMAT KHAS TERAS TEKNO & INVO
+                        </div>
+
+                        <div class="space-y-2">
+                            <h2 class="font-orbitron font-black text-3xl sm:text-4xl lg:text-5xl text-white leading-tight">
+                                MISI KHAS MATA: <br>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-mata-blue to-blue-500">OPERASI WUDUK SEMPURNA</span>
+                            </h2>
+                            <p class="text-lg sm:text-xl font-bold text-cyan-300">
+                                "Kenali dan Kuasai Enam Rukun Wuduk!"
+                            </p>
+                        </div>
+
+                        <!-- Kotak Dialog Ejen Ali -->
+                        <div class="bg-slate-900/90 border-l-4 border-mata-red rounded-2xl p-5 shadow-xl relative">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-2.5 py-0.5 bg-mata-red text-white font-orbitron text-xs font-bold rounded-md">EJEN ALI</span>
+                                <span class="text-xs text-slate-400 font-medium">Ketua Pasukan Latihan • Teras Tekno</span>
+                            </div>
+                            <p class="text-slate-100 text-base sm:text-lg leading-relaxed">
+                                "Perhatian semua ejen! Anda telah dipilih untuk menyertai latihan khas bagi menguasai langkah-langkah berwuduk mengikut <strong class="text-cyan-300">Mazhab Syafie</strong>. Pastikan setiap langkah difahami dan dilaksanakan mengikut turutan yang betul. Jom mulakan misi!"
+                            </p>
+                            <button onclick="speakText('Perhatian semua ejen! Anda telah dipilih untuk menyertai latihan khas bagi menguasai langkah-langkah berwuduk. Pastikan setiap langkah difahami dan dilaksanakan mengikut turutan yang betul. Jom mulakan misi!')" class="mt-3 inline-flex items-center gap-2 text-xs font-bold text-mata-blue hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-1.5 rounded-lg border border-cyan-500/30 transition">
+                                <i class="fa-solid fa-volume-high"></i> Dengar Arahan Ejen Ali
+                            </button>
+                        </div>
+
+                        <!-- Butang Interaktif Utama -->
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <button onclick="startMission()" class="btn-mata btn-mata-red flex-1 sm:flex-none px-8 py-4 rounded-2xl bg-gradient-to-r from-mata-red to-red-600 text-white font-orbitron font-bold text-base sm:text-lg tracking-wider shadow-lg shadow-red-600/30 flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-rocket"></i> MULA MISI
+                            </button>
+                            <button onclick="openModal('modal-guide')" class="btn-mata flex-1 sm:flex-none px-6 py-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 font-orbitron font-bold text-sm tracking-wider flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-book-open"></i> PANDUAN PEMBELAJARAN
+                            </button>
+                            <button onclick="openModal('modal-characters')" class="btn-mata flex-1 sm:flex-none px-6 py-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-500/40 font-orbitron font-bold text-sm tracking-wider flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-users-viewfinder"></i> KENALI WATAK
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kolum Visual Hologram 3D Ejen Ali di Markas MATA -->
+                    <div class="lg:col-span-5">
+                        <div class="relative rounded-3xl p-1 bg-gradient-to-b from-cyan-400/50 via-blue-600/20 to-red-500/50 shadow-2xl">
+                            <div class="bg-[#071024] rounded-[22px] p-5 relative overflow-hidden">
+                                <!-- Latar Markas MATA SVG + Hologram -->
+                                <div class="flex justify-between items-center text-[10px] font-orbitron text-cyan-400 mb-2">
+                                    <span>STATUS: SEDIA BERTUGAS</span>
+                                    <span>MOD: SIMULASI 3D</span>
+                                </div>
+
+                                <!-- Ilustrasi Vektor 3D Gaya Sinematik Ejen Ali -->
+                                <div class="relative h-72 sm:h-80 flex items-center justify-center animate-float">
+                                    <svg viewBox="0 0 320 340" class="w-full h-full drop-shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                                        <defs>
+                                            <radialGradient id="holoGlow" cx="50%" cy="50%" r="50%">
+                                                <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.35"/>
+                                                <stop offset="70%" stop-color="#0284C7" stop-opacity="0.1"/>
+                                                <stop offset="100%" stop-color="#060B19" stop-opacity="0"/>
+                                            </radialGradient>
+                                            <linearGradient id="suitRed" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#FF2A4B"/>
+                                                <stop offset="100%" stop-color="#991B1B"/>
+                                            </linearGradient>
+                                            <linearGradient id="irisVisor" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.85"/>
+                                                <stop offset="50%" stop-color="#7DD3FC" stop-opacity="0.95"/>
+                                                <stop offset="100%" stop-color="#0284C7" stop-opacity="0.85"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <!-- Tapak Hologram Markas MATA -->
+                                        <circle cx="160" cy="170" r="145" fill="url(#holoGlow)"/>
+                                        <ellipse cx="160" cy="310" rx="115" ry="20" fill="none" stroke="#00E5FF" stroke-width="2" stroke-dasharray="8 4"/>
+                                        <ellipse cx="160" cy="310" rx="85" ry="13" fill="rgba(0,229,255,0.15)" stroke="#00E5FF" stroke-width="1"/>
+                                        
+                                        <!-- Gelung Data Futuristik -->
+                                        <circle cx="160" cy="165" r="125" fill="none" stroke="#00E5FF" stroke-width="1" stroke-dasharray="15 10" opacity="0.5"/>
+                                        <circle cx="160" cy="165" r="110" fill="none" stroke="#FF2A4B" stroke-width="1.5" stroke-dasharray="4 12" opacity="0.6"/>
+
+                                        <!-- Badan Ejen Ali (Sut Tekno Merah Hitam) -->
+                                        <path d="M110 215 Q160 195 210 215 L225 295 L95 295 Z" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+                                        <path d="M120 212 L160 235 L200 212 L212 285 L108 285 Z" fill="url(#suitRed)"/>
+                                        <!-- Lambang MATA di Dada -->
+                                        <polygon points="160,238 172,250 160,262 148,250" fill="#0F172A" stroke="#00E5FF" stroke-width="2"/>
+                                        <circle cx="160" cy="250" r="3" fill="#00E5FF"/>
+
+                                        <!-- Lengan & Gasing/Yoyo Tekno -->
+                                        <path d="M110 218 L75 255 L95 270 L122 240" fill="#1E293B" stroke="#FF2A4B" stroke-width="2"/>
+                                        <path d="M210 218 L245 245 L230 265 L198 240" fill="#1E293B" stroke="#FF2A4B" stroke-width="2"/>
+                                        <!-- Hologram Air di Tangan -->
+                                        <circle cx="242" cy="235" r="16" fill="rgba(0,229,255,0.25)" stroke="#00E5FF" stroke-width="2"/>
+                                        <path d="M242 224 C242 224 235 233 235 238 C235 242 238 245 242 245 C246 245 249 242 249 238 C249 233 242 224 242 224 Z" fill="#00E5FF"/>
+
+                                        <!-- Leher & Kepala -->
+                                        <rect x="148" y="185" width="24" height="25" rx="8" fill="#FDBA74"/>
+                                        <!-- Muka -->
+                                        <path d="M118 130 C118 95 202 95 202 130 C202 172 182 195 160 195 C138 195 118 172 118 130 Z" fill="#FED7AA"/>
+                                        <!-- Rambut Pacak Ikonik Ejen Ali -->
+                                        <path d="M112 132 C105 95 125 65 155 62 L148 48 L175 62 L192 52 L188 70 C210 80 215 110 206 134 C202 110 185 95 160 95 C135 95 118 110 112 132 Z" fill="#0F172A"/>
+                                        
+                                        <!-- Kaca Mata IRIS -->
+                                        <rect x="122" y="122" width="76" height="24" rx="8" fill="url(#irisVisor)" stroke="#FFFFFF" stroke-width="1.5"/>
+                                        <line x1="160" y1="122" x2="160" y2="146" stroke="#0284C7" stroke-width="2"/>
+                                        <!-- Pantulan Cahaya IRIS -->
+                                        <line x1="128" y1="127" x2="145" y2="127" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                                        <line x1="168" y1="127" x2="185" y2="127" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                                        <!-- Senyuman Yakin -->
+                                        <path d="M148 168 Q160 176 172 168" fill="none" stroke="#9A3412" stroke-width="2.5" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+
+                                <!-- Info Skrin Bawah -->
+                                <div class="mt-2 grid grid-cols-3 gap-2 text-center bg-slate-900/90 p-3 rounded-xl border border-cyan-500/20">
+                                    <div>
+                                        <div class="text-[10px] text-slate-400">RUKUN WUDUK</div>
+                                        <div class="font-orbitron font-bold text-sm text-mata-blue">6 LANGKAH</div>
+                                    </div>
+                                    <div class="border-x border-slate-700">
+                                        <div class="text-[10px] text-slate-400">MAZHAB</div>
+                                        <div class="font-orbitron font-bold text-sm text-white">SYAFIE</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] text-slate-400">UJIAN MISI</div>
+                                        <div class="font-orbitron font-bold text-sm text-mata-red">AKTIF</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baris Kad Watak Pembimbing Pantas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="mata-glass rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-mata-red">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center text-mata-red text-xl shrink-0">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-orbitron font-bold text-sm text-white">EJEN ALI</h3>
+                        <p class="text-xs text-slate-300">Pembimbing Utama & Demonstrasi 3D</p>
+                    </div>
+                </div>
+                <div class="mata-glass rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-cyan-400">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl shrink-0">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-orbitron font-bold text-sm text-white">ALICIA</h3>
+                        <p class="text-xs text-slate-300">Penganalisis Fakta & Syarat Sah</p>
+                    </div>
+                </div>
+                <div class="mata-glass rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-amber-400">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-xl shrink-0">
+                        <i class="fa-solid fa-shield"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-orbitron font-bold text-sm text-white">EJEN BAKAR</h3>
+                        <p class="text-xs text-slate-300">Sokongan Disiplin & Semangat</p>
+                    </div>
+                </div>
+                <div class="mata-glass rounded-2xl p-4 flex items-center gap-3.5 border-l-4 border-purple-400">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 text-xl shrink-0">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-orbitron font-bold text-sm text-white">EJEN DAYANG</h3>
+                        <p class="text-xs text-slate-300">Ketua Teras Tekno • Arahan Misi</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- HALAMAN 2: NOTA PEMBELAJARAN UTAMA (6 RUKUN WUDUK INTERAKTIF)         -->
+        <!-- ===================================================================== -->
+        <section id="view-lesson" class="hidden space-y-6">
+            <!-- Navigasi Pantas Langkah 1 - 6 -->
+            <div class="mata-glass rounded-2xl p-3 sm:p-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-lg bg-cyan-500/20 text-mata-blue font-orbitron text-xs font-bold border border-cyan-400/30">
+                            MODUL LATIHAN RUKUN WUDUK
+                        </span>
+                        <span id="step-badge-count" class="font-orbitron text-sm font-bold text-white">LANGKAH 1 / 6</span>
+                    </div>
+                    <div class="text-xs text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-mata-blue"></i>
+                        <span>Klik pada bahagian badan 3D atau tekan <strong>DEMONSTRASI</strong> untuk simulasi air!</span>
+                    </div>
+                </div>
+
+                <!-- Butang Tab Langkah 1 hingga 6 -->
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="step-pills-container">
+                    <!-- Dijana oleh JS -->
+                </div>
+            </div>
+
+            <!-- Paparan Utama Split: Kiri (Simulasi 3D Hologram), Kanan (Nota & Poin Penting) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                
+                <!-- KOLUM KIRI: PENTAS SIMULASI 3D & HOLOGRAM ANGGOTA BADAN (7 Kolum) -->
+                <div class="lg:col-span-7 flex flex-col mata-glass hud-corner rounded-3xl p-4 sm:p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                            <span class="font-orbitron text-xs font-bold tracking-wider text-cyan-300">BILIK LATIHAN WUDUK M.A.T.A (3D HOLO-SIM)</span>
+                        </div>
+                        <span id="hologram-target-label" class="px-3 py-1 rounded-full bg-blue-500/20 border border-cyan-400/40 text-xs font-bold text-cyan-200">
+                            Fokus: Hati & Muka
+                        </span>
+                    </div>
+
+                    <!-- Kanvas Three.js 3D Interaktif -->
+                    <div id="canvas-container" class="flex-grow border border-cyan-500/30 shadow-inner">
+                        <!-- Lapisan Overlay HUD di atas Kanvas 3D -->
+                        <div class="absolute top-3 left-3 z-10 pointer-events-none space-y-1">
+                            <div class="bg-slate-950/75 backdrop-blur px-3 py-1.5 rounded-lg border border-cyan-500/30 text-[11px] font-orbitron text-cyan-300">
+                                <i class="fa-solid fa-hand-pointer mr-1 text-mata-red"></i> SERET UNTUK PUTAR 360° • KLIK ANGGOTA
+                            </div>
+                            <div id="demo-status-badge" class="hidden bg-cyan-950/90 backdrop-blur px-3 py-1 rounded-lg border border-cyan-400 text-[11px] font-bold text-cyan-200 animate-pulse">
+                                <i class="fa-solid fa-video mr-1 text-mata-red"></i> <span id="demo-status-text">SIMULASI AKTIF</span>
+                            </div>
+                        </div>
+
+                        <!-- Kotak Maklum Balas Apabila Pengguna Klik Anggota Badan 3D -->
+                        <div id="body-part-feedback" class="hidden absolute bottom-16 left-3 right-3 sm:right-auto sm:max-w-sm z-10 bg-slate-950/90 backdrop-blur-md border border-cyan-400 rounded-xl p-3 shadow-lg transition-all">
+                            <div class="flex items-start gap-2.5">
+                                <i class="fa-solid fa-crosshairs text-mata-blue mt-0.5"></i>
+                                <div>
+                                    <div id="feedback-part-title" class="font-orbitron text-xs font-bold text-mata-blue">PENGESANAN HOLOGRAM</div>
+                                    <p id="feedback-part-desc" class="text-xs text-slate-200 mt-0.5 leading-relaxed"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Butang Kawalan Interaktif Bawah Kanvas -->
+                        <div class="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2">
+                            <button onclick="triggerDemonstration()" id="btn-demo" class="btn-mata px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-orbitron font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/30">
+                                <i class="fa-solid fa-droplet"></i> DEMONSTRASI AIR & GERAKAN
+                            </button>
+                            <button onclick="highlightTargetZone()" class="btn-mata px-3.5 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-cyan-300 border border-cyan-400/50 font-orbitron font-bold text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-expand"></i> IMBAS HOLOGRAM WAJIB
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KOLUM KANAN: KANDUNGAN NOTA PENDIDIKAN ISLAM (5 Kolum) -->
+                <div class="lg:col-span-5 flex flex-col justify-between mata-glass rounded-3xl p-5 sm:p-6 space-y-5">
+                    <div class="space-y-4">
+                        <!-- Nombor & Tajuk Langkah -->
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <span id="lesson-step-number" class="inline-block px-3 py-1 rounded-lg bg-mata-red text-white font-orbitron font-bold text-xs tracking-wider mb-2">
+                                    RUKUN WUDUK #1
+                                </span>
+                                <h2 id="lesson-title" class="font-orbitron font-black text-2xl sm:text-3xl text-white leading-tight">
+                                    NIAT
+                                </h2>
+                            </div>
+                            <!-- Butang Pembantu AI Suara -->
+                            <button onclick="speakCurrentStep()" id="btn-ai-voice" class="btn-mata shrink-0 px-3.5 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/50 text-cyan-300 flex flex-col items-center gap-1" title="Dengar Penerangan Suara Bahasa Melayu">
+                                <i class="fa-solid fa-robot text-lg text-mata-blue"></i>
+                                <span class="font-orbitron text-[10px] font-bold">PEMBANTU AI</span>
+                            </button>
+                        </div>
+
+                        <!-- Penerangan Utama -->
+                        <div class="bg-slate-900/80 rounded-2xl p-4 border border-slate-700/80">
+                            <div class="text-xs font-orbitron font-bold text-cyan-400 mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-book-quran"></i> PENERANGAN RUKUN:
+                            </div>
+                            <p id="lesson-description" class="text-slate-100 text-base leading-relaxed font-medium">
+                                <!-- Diisi oleh JS -->
+                            </p>
+                        </div>
+
+                        <!-- Poin Penting -->
+                        <div class="space-y-2.5">
+                            <div class="text-xs font-orbitron font-bold text-amber-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-triangle-exclamation"></i> POIN PENTING (MAZHAB SYAFIE):
+                            </div>
+                            <ul id="lesson-points" class="space-y-2 text-sm text-slate-200">
+                                <!-- Diisi oleh JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Nota Tambahan Watak (Alicia / Bakar / Dayang) -->
+                        <div id="character-tip-box" class="bg-gradient-to-r from-cyan-950/80 to-slate-900/90 border-l-4 border-cyan-400 rounded-xl p-3.5">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span id="tip-character-name" class="font-orbitron text-xs font-bold text-cyan-300">ALICIA • ANALISIS DATA</span>
+                            </div>
+                            <p id="tip-character-text" class="text-xs sm:text-sm text-slate-200 italic">
+                                <!-- Diisi oleh JS -->
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Butang Navigasi Langkah -->
+                    <div class="pt-3 border-t border-slate-700/70 flex items-center justify-between gap-3">
+                        <button onclick="prevStep()" id="btn-prev-step" class="btn-mata px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none text-white font-orbitron font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-600">
+                            <i class="fa-solid fa-chevron-left"></i> SEBELUMNYA
+                        </button>
+
+                        <button onclick="nextStep()" id="btn-next-step" class="btn-mata btn-mata-red flex-grow px-5 py-3 rounded-xl bg-gradient-to-r from-mata-red to-red-600 text-white font-orbitron font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-red-600/25">
+                            <span id="btn-next-text">LANGKAH SETERUSNYA</span> <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- HALAMAN 3: AKTIVITI INTERAKTIF (CABARAN EJEN: SUSUN LANGKAH WUDUK)    -->
+        <!-- ===================================================================== -->
+        <section id="view-quiz" class="hidden space-y-6">
+            <div class="mata-glass hud-corner rounded-3xl p-6 sm:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-cyan-500/20">
+                    <div>
+                        <span class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 font-orbitron text-xs font-bold">
+                            UJIAN KECEKAPAN EJEN M.A.T.A
+                        </span>
+                        <h2 class="font-orbitron font-black text-2xl sm:text-3xl text-white mt-2">
+                            CABARAN EJEN: SUSUN LANGKAH WUDUK
+                        </h2>
+                        <p class="text-slate-300 text-sm sm:text-base mt-1">
+                            Seret dan lepaskan (atau klik untuk pilih & letak) kad rukun wuduk di bawah ke dalam slot urutan yang betul dari <strong>1 hingga 6</strong>.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-slate-900/90 px-4 py-2.5 rounded-2xl border border-cyan-500/30 text-center">
+                            <div class="text-[10px] font-orbitron text-slate-400">MARKAH SEMASA</div>
+                            <div id="quiz-score-display" class="font-orbitron font-black text-xl text-mata-blue">0 / 100</div>
+                        </div>
+                        <button onclick="resetQuiz()" class="btn-mata px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 font-orbitron text-xs font-bold">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> SET SEMULA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kawasan Permainan Susunan -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                    <!-- Bank Kad Rawak (Kiri) -->
+                    <div class="lg:col-span-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-orbitron font-bold text-sm text-cyan-300">
+                                <i class="fa-solid fa-layer-group mr-1.5"></i> BANK KAD RUKUN (RAWAK)
+                            </h3>
+                            <span class="text-xs text-slate-400">Seret ke kanan <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+                        <div id="quiz-card-bank" class="min-h-[340px] bg-slate-950/60 rounded-2xl p-3.5 border border-dashed border-slate-700 space-y-2.5">
+                            <!-- Kad Rawak Dijana oleh JS -->
+                        </div>
+                    </div>
+
+                    <!-- Slot Urutan 1 - 6 (Kanan) -->
+                    <div class="lg:col-span-7 space-y-3">
+                        <h3 class="font-orbitron font-bold text-sm text-mata-red">
+                            <i class="fa-solid fa-list-ol mr-1.5"></i> SUSUNAN TERTIB RUKUN WUDUK (1 - 6)
+                        </h3>
+                        <div id="quiz-slots-container" class="space-y-2.5">
+                            <!-- 6 Slot Drop Zone Dijana oleh JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kotak Keputusan & Maklum Balas Ejen Ali -->
+                <div id="quiz-feedback-panel" class="hidden mt-6 rounded-2xl p-5 border transition-all">
+                    <!-- Diisi oleh JS -->
+                </div>
+
+                <!-- Butang Tindakan Kuiz -->
+                <div class="mt-6 pt-5 border-t border-slate-700/70 flex flex-wrap items-center justify-between gap-4">
+                    <button onclick="navigateTo('lesson')" class="btn-mata px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-orbitron font-bold text-xs sm:text-sm border border-slate-600">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> KEMBALI KE NOTA
+                    </button>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="checkQuizAnswers()" id="btn-check-quiz" class="btn-mata btn-mata-red px-7 py-3.5 rounded-xl bg-gradient-to-r from-mata-red to-red-600 text-white font-orbitron font-bold text-sm shadow-lg shadow-red-600/30">
+                            <i class="fa-solid fa-check-double mr-2"></i> SEMAK JAWAPAN MISI
+                        </button>
+                        <button onclick="navigateTo('summary')" id="btn-to-summary" class="hidden btn-mata px-7 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-orbitron font-extrabold text-sm shadow-lg shadow-emerald-500/30">
+                            LIHAT RUMUSAN MISI <i class="fa-solid fa-trophy ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- HALAMAN 4: HALAMAN RUMUSAN MISI (INFOGRAFIK & PENGHARGAAN)            -->
+        <!-- ===================================================================== -->
+        <section id="view-summary" class="hidden space-y-6">
+            <div class="mata-glass hud-corner rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+                <!-- Tajuk Kejayaan -->
+                <div class="text-center max-w-3xl mx-auto space-y-3 mb-8">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-orbitron text-xs font-bold">
+                        <i class="fa-solid fa-award"></i> STATUS MISI: BERJAYA DISEMPURNAKAN
+                    </div>
+                    <h2 class="font-orbitron font-black text-3xl sm:text-4xl text-white">
+                        RUMUSAN MISI: ENAM RUKUN WUDUK
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base">
+                        Infografik rasmi Akademi M.A.T.A berpandukan Mazhab Syafie. Pastikan keenam-enam rukun ini dilaksanakan dengan sempurna.
+                    </p>
+                </div>
+
+                <!-- Grid Infografik 6 Rukun Wuduk -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8" id="summary-infographic-grid">
+                    <!-- Dijana oleh JS -->
+                </div>
+
+                <!-- Ucapan Tahniah Ejen Ali -->
+                <div class="bg-gradient-to-r from-slate-900 via-blue-950/60 to-slate-900 border border-cyan-400/40 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-mata-red to-red-800 flex items-center justify-center shrink-0 border-2 border-white/20 shadow-lg shadow-red-500/30">
+                        <i class="fa-solid fa-medal text-4xl text-amber-300"></i>
+                    </div>
+                    <div class="flex-grow text-center sm:text-left space-y-2">
+                        <div class="flex items-center justify-center sm:justify-start gap-2">
+                            <span class="px-2.5 py-0.5 bg-mata-red text-white font-orbitron text-xs font-bold rounded">EJEN ALI</span>
+                            <span class="text-xs text-cyan-300 font-orbitron">TAHNIAH EJEN MUDA!</span>
+                        </div>
+                        <p class="text-white text-base sm:text-lg font-medium leading-relaxed">
+                            "Tahniah, ejen! Anda telah berjaya menguasai enam rukun wuduk. Ingat, setiap rukun mestilah dilakukan dengan betul dan mengikut tertib supaya wuduk menjadi sah."
+                        </p>
+                    </div>
+                    <button onclick="speakText('Tahniah, ejen! Anda telah berjaya menguasai enam rukun wuduk. Ingat, setiap rukun mestilah dilakukan dengan betul dan mengikut tertib supaya wuduk menjadi sah.')" class="btn-mata shrink-0 px-4 py-3 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 font-orbitron text-xs font-bold">
+                        <i class="fa-solid fa-volume-high mr-1"></i> DENGAR UCAPAN
+                    </button>
+                </div>
+
+                <!-- Butang Kawalan Akhir -->
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+                    <button onclick="startMission()" class="btn-mata px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 font-orbitron font-bold text-xs sm:text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-book-open-reader"></i> ULANG KAJI NOTA
+                    </button>
+                    <button onclick="navigateTo('quiz'); resetQuiz();" class="btn-mata px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 font-orbitron font-bold text-xs sm:text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad"></i> ULANG AKTIVITI
+                    </button>
+                    <button onclick="finishMission()" class="btn-mata btn-mata-red px-8 py-3.5 rounded-xl bg-gradient-to-r from-mata-red to-red-600 text-white font-orbitron font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-red-600/30">
+                        <i class="fa-solid fa-flag-checkered"></i> TAMATKAN MISI
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 1: PANDUAN PEMBELAJARAN                                         -->
+    <!-- ===================================================================== -->
+    <div id="modal-guide" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="mata-glass hud-corner max-w-lg w-full rounded-3xl p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+                <h3 class="font-orbitron font-bold text-lg text-mata-blue flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i> PANDUAN LATIHAN M.A.T.A
+                </h3>
+                <button onclick="closeModal('modal-guide')" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm text-slate-200 leading-relaxed">
+                <div class="flex gap-3 bg-slate-900/80 p-3 rounded-xl">
+                    <span class="font-orbitron font-bold text-mata-red">01</span>
+                    <p><strong>Teroka 6 Rukun Wuduk:</strong> Pelajari setiap rukun mengikut susunan yang wajib dalam Mazhab Syafie.</p>
+                </div>
+                <div class="flex gap-3 bg-slate-900/80 p-3 rounded-xl">
+                    <span class="font-orbitron font-bold text-cyan-400">02</span>
+                    <p><strong>Interaksi Hologram 3D:</strong> Seret model 3D untuk melihat sudut berbeza, klik pada bahagian badan untuk semakan anggota wajib, dan tekan <strong>DEMONSTRASI</strong> untuk simulasi air.</p>
+                </div>
+                <div class="flex gap-3 bg-slate-900/80 p-3 rounded-xl">
+                    <span class="font-orbitron font-bold text-amber-400">03</span>
+                    <p><strong>Pembantu Suara AI:</strong> Tekan ikon robot pada setiap langkah untuk mendengar penerangan Bahasa Melayu yang jelas.</p>
+                </div>
+                <div class="flex gap-3 bg-slate-900/80 p-3 rounded-xl">
+                    <span class="font-orbitron font-bold text-emerald-400">04</span>
+                    <p><strong>Uji Kecekapan Ejen:</strong> Selesaikan cabaran menyusun 6 rukun wuduk mengikut tertib untuk menamatkan misi.</p>
+                </div>
+            </div>
+            <button onclick="closeModal('modal-guide')" class="w-full py-3 rounded-xl bg-cyan-500 text-slate-950 font-orbitron font-bold text-sm">
+                FAHAM, TERUSKAN!
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 2: KENALI WATAK EJEN MATA                                       -->
+    <!-- ===================================================================== -->
+    <div id="modal-characters" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="mata-glass hud-corner max-w-2xl w-full rounded-3xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+                <h3 class="font-orbitron font-bold text-lg text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-users-viewfinder"></i> PROFIL EJEN PEMBIMBING M.A.T.A
+                </h3>
+                <button onclick="closeModal('modal-characters')" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-red-500/40 space-y-1.5">
+                    <div class="font-orbitron font-bold text-mata-red">EJEN ALI (TERAS TEKNO)</div>
+                    <p class="text-slate-300 text-xs leading-relaxed">Pemakai peranti I.R.I.S. yang membimbing anda secara langsung melalui demonstrasi langkah demi langkah di bilik latihan wuduk.</p>
+                </div>
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-cyan-500/40 space-y-1.5">
+                    <div class="font-orbitron font-bold text-cyan-400">ALICIA (TERAS NEURO)</div>
+                    <p class="text-slate-300 text-xs leading-relaxed">Ejen pintar yang memastikan setiap fakta hukum dan sempadan anggota wuduk diterangkan dengan tepat mengikut Mazhab Syafie.</p>
+                </div>
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 space-y-1.5">
+                    <div class="font-orbitron font-bold text-amber-400">EJEN BAKAR (TERAS KOMBAT)</div>
+                    <p class="text-slate-300 text-xs leading-relaxed">Bapa saudara Ali yang sentiasa memberikan kata-kata semangat agar setiap ejen menjaga disiplin dan kesempurnaan ibadah.</p>
+                </div>
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-purple-500/40 space-y-1.5">
+                    <div class="font-orbitron font-bold text-purple-400">EJEN DAYANG (KETUA TERAS TEKNO)</div>
+                    <p class="text-slate-300 text-xs leading-relaxed">Pemimpin tertinggi yang memantau kemajuan misi dan mengesahkan kelayakan ejen setelah berjaya menguasai enam rukun wuduk.</p>
+                </div>
+            </div>
+            <button onclick="closeModal('modal-characters')" class="w-full py-3 rounded-xl bg-amber-400 text-slate-950 font-orbitron font-bold text-sm">
+                TUTUP PROFIL
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- KOTAK MESEJ SISTEM (PENGGANTI ALERT)                                  -->
+    <!-- ===================================================================== -->
+    <div id="system-toast" class="hidden fixed bottom-5 right-5 z-50 max-w-sm bg-slate-900 border-2 border-cyan-400 text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+        <i class="fa-solid fa-shield-check text-2xl text-mata-blue"></i>
+        <div>
+            <div class="font-orbitron text-xs font-bold text-mata-blue">SISTEM I.R.I.S M.A.T.A</div>
+            <p id="system-toast-text" class="text-xs sm:text-sm text-slate-200 mt-0.5"></p>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SKRIP LOGIK APLIKASI, KANDUNGAN PENDIDIKAN ISLAM & SIMULASI 3D        -->
+    <!-- ===================================================================== -->
+    <script>
+        // -------------------------------------------------------------------------
+        // 1. DATA KANDUNGAN TEPAT PENDIDIKAN ISLAM (6 RUKUN WUDUK MAZHAB SYAFIE)
+        // -------------------------------------------------------------------------
+        const WUDUK_STEPS = [
+            {
+                id: 1,
+                shortTitle: "Niat",
+                title: "LANGKAH 1: NIAT",
+                targetLabel: "Fokus: Hati (Serentak Basuhan Muka)",
+                hologramZone: "heart_face",
+                icon: "fa-heart-pulse",
+                description: "Berniat di dalam hati untuk mengangkat hadas kecil atau menunaikan fardu wuduk ketika air mula mengenai muka.",
+                points: [
+                    "Niat merupakan perkara wajib (rukun pertama) dalam wuduk.",
+                    "Tempat niat adalah di dalam hati.",
+                    "Niat perlu dilakukan serentak dengan permulaan membasuh muka.",
+                    "Lafaz niat menggunakan lidah bukan syarat wajib sah wuduk."
+                ],
+                characterName: "ALICIA • ANALISIS HUKUM",
+                characterTip: "Ingat ejen! Niat mestilah lintasan di dalam hati tepat pada saat air pertama kali menyentuh mana-mana bahagian muka.",
+                voiceText: "Langkah pertama: Niat. Berniat di dalam hati untuk mengangkat hadas kecil atau menunaikan fardu wuduk ketika air mula mengenai muka. Tempat niat adalah di dalam hati, dan lafaz niat menggunakan lidah bukanlah syarat wajib sah wuduk."
+            },
+            {
+                id: 2,
+                shortTitle: "Basuh Muka",
+                title: "LANGKAH 2: MEMBASUH SELURUH MUKA",
+                targetLabel: "Sempadan: Dahi ke Dagu • Telinga Kanan ke Kiri",
+                hologramZone: "face",
+                icon: "fa-face-smile",
+                description: "Meratakan air ke seluruh bahagian muka bermula dari tempat tumbuh rambut di bahagian atas dahi hingga ke bawah dagu, serta dari kawasan telinga kanan hingga ke telinga kiri.",
+                points: [
+                    "Pastikan seluruh bahagian muka terkena air secara merata.",
+                    "Air mesti sampai ke semua kawasan muka yang wajib dibasuh (dari dahi ke dagu, dan telinga kanan ke telinga kiri).",
+                    "Niat dilakukan ketika permulaan basuhan muka."
+                ],
+                characterName: "EJEN ALI • DEMONSTRASI HOLOGRAM",
+                characterTip: "Lihat garisan hologram biru pada muka saya! Pastikan air mengalir rata meliputi dahi, kening, mata, hidung, pipi hingga bawah dagu.",
+                voiceText: "Langkah kedua: Membasuh seluruh muka. Meratakan air ke seluruh bahagian muka bermula dari tempat tumbuh rambut di bahagian atas dahi hingga ke bawah dagu, serta dari kawasan telinga kanan hingga ke telinga kiri."
+            },
+            {
+                id: 3,
+                shortTitle: "Basuh Tangan",
+                title: "LANGKAH 3: MEMBASUH KEDUA-DUA TANGAN HINGGA KE SIKU",
+                targetLabel: "Sempadan: Hujung Jari Melepasi Kedua-dua Siku",
+                hologramZone: "arms",
+                icon: "fa-hands-bubbles",
+                description: "Membasuh kedua-dua tangan bermula dari hujung jari hingga melepasi kedua-dua siku.",
+                points: [
+                    "Kedua-dua tangan (kanan dan kiri) wajib dibasuh.",
+                    "Bahagian siku termasuk dalam kawasan yang wajib dibasuh (perlu dilebihkan sedikit dari paras siku).",
+                    "Pastikan air merata pada keseluruhan bahagian tangan yang diwajibkan termasuk celah jari dan bawah kuku."
+                ],
+                characterName: "EJEN BAKAR • SEMAKAN ANGGOTA",
+                characterTip: "Jangan berhenti setakat pergelangan atau bawah siku! Pastikan air melepasi kedua-dua siku supaya wuduk kita sah.",
+                voiceText: "Langkah ketiga: Membasuh kedua-dua tangan hingga ke siku. Membasuh kedua-dua tangan bermula dari hujung jari hingga melepasi kedua-dua siku. Pastikan air merata pada keseluruhan bahagian tangan yang diwajibkan."
+            },
+            {
+                id: 4,
+                shortTitle: "Sapu Kepala",
+                title: "LANGKAH 4: MENYAPU SEBAHAGIAN KEPALA",
+                targetLabel: "Perbuatan: Menyapu Sebahagian Kepala",
+                hologramZone: "head",
+                icon: "fa-hand-sparkles",
+                description: "Menyapu sebahagian daripada kepala menggunakan tangan yang dibasahkan dengan air.",
+                points: [
+                    "Wajib menyapu sebahagian kepala (walaupun sedikit rambut di dalam had kepala atau kulit kepala).",
+                    "Tidak disyaratkan membasuh seluruh rambut atau seluruh kepala.",
+                    "Perbuatan ini ialah MENYAPU (mengalirkan tangan basah), bukannya membasuh atau menjirus air."
+                ],
+                characterName: "ALICIA • PERBEZAAN PENTING",
+                characterTip: "Perhatian ejen! Rukun keempat ini ialah MENYAPU sebahagian kepala dengan tangan basah, berbeza dengan membasuh muka atau tangan.",
+                voiceText: "Langkah keempat: Menyapu sebahagian kepala. Menyapu sebahagian daripada kepala menggunakan tangan yang dibasahkan dengan air. Tidak disyaratkan membasuh seluruh rambut atau seluruh kepala."
+            },
+            {
+                id: 5,
+                shortTitle: "Basuh Kaki",
+                title: "LANGKAH 5: MEMBASUH KEDUA-DUA KAKI HINGGA KE BUKU LALI",
+                targetLabel: "Sempadan: Hujung Jari Kaki Melepasi Buku Lali",
+                hologramZone: "feet",
+                icon: "fa-shoe-prints",
+                description: "Membasuh kedua-dua kaki bermula dari hujung jari kaki sehingga melepasi kedua-dua buku lali.",
+                points: [
+                    "Kedua-dua kaki (kanan dan kiri) wajib dibasuh.",
+                    "Kedua-dua buku lali (tulang yang menonjol di bahagian tepi pergelangan kaki) termasuk dalam kawasan yang wajib dibasuh.",
+                    "Pastikan air merata pada keseluruhan bahagian kaki termasuk tumit, tapak kaki dan celah-celah jari kaki."
+                ],
+                characterName: "EJEN ALI • PENGESANAN BUKU LALI",
+                characterTip: "Perhatikan penanda hologram pada buku lali! Pastikan air mengenai keseluruhan kaki hingga melepasi paras buku lali.",
+                voiceText: "Langkah kelima: Membasuh kedua-dua kaki hingga ke buku lali. Membasuh kedua-dua kaki bermula dari hujung jari kaki sehingga melepasi kedua-dua buku lali."
+            },
+            {
+                id: 6,
+                shortTitle: "Tertib",
+                title: "LANGKAH 6: TERTIB",
+                targetLabel: "Susunan Wajib: Langkah 1 hingga Langkah 5",
+                hologramZone: "all",
+                icon: "fa-arrow-down-1-9",
+                description: "Melakukan semua rukun wuduk mengikut susunan yang telah ditetapkan, iaitu bermula dengan niat ketika membasuh muka, diikuti membasuh kedua-dua tangan hingga siku, menyapu sebahagian kepala dan membasuh kedua-dua kaki hingga buku lali.",
+                points: [
+                    "Semua rukun wuduk mesti dilaksanakan mengikut susunan yang ditetapkan.",
+                    "Tidak boleh sengaja mendahulukan anggota yang sepatutnya dilakukan kemudian (contohnya membasuh kaki dahulu sebelum tangan).",
+                    "Tertib merupakan rukun keenam yang melengkapkan kesahihan wuduk."
+                ],
+                characterName: "EJEN DAYANG • ARAHAN TERAS TEKNO",
+                characterTip: "Disiplin adalah kunci kejayaan ejen MATA. Begitu juga dalam berwuduk, tertib memastikan setiap rukun mengikut urutan yang tepat.",
+                voiceText: "Langkah keenam: Tertib. Melakukan semua rukun wuduk mengikut susunan yang telah ditetapkan, iaitu bermula dengan niat ketika membasuh muka, diikuti membasuh kedua-dua tangan hingga siku, menyapu sebahagian kepala dan membasuh kedua-dua kaki hingga buku lali."
+            }
+        ];
+
+        // State Aplikasi
+        let currentStepIndex = 0;
+        let completedSteps = new Set([0]);
+        let isMuted = false;
+        let isDemonstrating = false;
+        let demoTimer = null;
+
+        // -------------------------------------------------------------------------
+        // 2. KESAN BUNYI FUTURISTIK (TONE.JS) & PENERANGAN SUARA BAHASA MELAYU
+        // -------------------------------------------------------------------------
+        function playUiBeep(freq = 660, duration = "16n") {
+            if (isMuted || typeof Tone === 'undefined') return;
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const synth = new Tone.Synth({
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.1 }
+                }).toDestination();
+                synth.volume.value = -14;
+                synth.triggerAttackRelease(freq, duration);
+            } catch (e) {
+                // Abaikan jika browser menyekat audio sebelum interaksi
+            }
+        }
+
+        function toggleAudioMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('btn-mute');
+            if (isMuted) {
+                window.speechSynthesis.cancel();
+                btn.innerHTML = '<i class="fa-solid fa-volume-xmark text-mata-red"></i>';
+                showToast("Audio sistem & suara AI telah disenyapkan.");
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                playUiBeep(880);
+                showToast("Audio sistem & suara AI diaktifkan.");
+            }
+        }
+
+        function speakText(text) {
+            if (isMuted) {
+                showToast("Sila aktifkan ikon bunyi di bahagian atas kanan untuk mendengar suara AI.");
+                return;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                // Cuba pilih suara Bahasa Melayu (ms-MY) atau Indonesia yang paling hampir
+                const voices = window.speechSynthesis.getVoices();
+                const msVoice = voices.find(v => v.lang.includes('ms') || v.lang.includes('MY')) 
+                             || voices.find(v => v.lang.includes('id'));
+                if (msVoice) {
+                    utterance.voice = msVoice;
+                }
+                utterance.lang = 'ms-MY';
+                utterance.rate = 0.95; // Sedikit perlahan agar jelas untuk murid sekolah rendah
+                utterance.pitch = 1.05;
+                window.speechSynthesis.speak(utterance);
+                showToast("Pembantu AI sedang membacakan penerangan...");
+            } else {
+                showToast("Pelayar anda tidak menyokong sintesis suara automatik.");
+            }
+        }
+
+        function speakCurrentStep() {
+            playUiBeep(780);
+            speakText(WUDUK_STEPS[currentStepIndex].voiceText);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('system-toast');
+            document.getElementById('system-toast-text').textContent = msg;
+            toast.classList.remove('hidden');
+            clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // -------------------------------------------------------------------------
+        // 3. SISTEM NAVIGASI HALAMAN & MODAL
+        // -------------------------------------------------------------------------
+        function navigateTo(viewName) {
+            playUiBeep(620);
+            window.speechSynthesis.cancel();
+
+            const views = ['intro', 'lesson', 'quiz', 'summary'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            const progressContainer = document.getElementById('header-progress-container');
+            if (viewName === 'intro') {
+                progressContainer.classList.add('hidden');
+            } else {
+                progressContainer.classList.remove('hidden');
+            }
+
+            if (viewName === 'lesson') {
+                renderStep(currentStepIndex);
+                setTimeout(() => {
+                    onWindowResize();
+                }, 50);
+            } else if (viewName === 'quiz') {
+                initQuiz();
+            } else if (viewName === 'summary') {
+                renderSummaryInfographic();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startMission() {
+            playUiBeep(920);
+            currentStepIndex = 0;
+            navigateTo('lesson');
+        }
+
+        function openModal(id) {
+            playUiBeep(700);
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            playUiBeep(520);
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function updateProgressUI() {
+            const count = completedSteps.size;
+            const percent = Math.round((count / WUDUK_STEPS.length) * 100);
+            document.getElementById('header-progress-bar').style.width = `${percent}%`;
+            document.getElementById('header-progress-text').textContent = `${count}/6`;
+        }
+
+        // -------------------------------------------------------------------------
+        // 4. PAPARAN NOTA PEMBELAJARAN (LANGKAH 1 - 6)
+        // -------------------------------------------------------------------------
+        function renderStepPills() {
+            const container = document.getElementById('step-pills-container');
+            container.innerHTML = '';
+
+            WUDUK_STEPS.forEach((step, idx) => {
+                const isActive = idx === currentStepIndex;
+                const isDone = completedSteps.has(idx);
+                const btn = document.createElement('button');
+                btn.className = `px-2.5 py-2 rounded-xl font-orbitron text-xs font-bold transition flex items-center justify-center gap-1.5 border ${
+                    isActive 
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 border-white shadow-lg shadow-cyan-500/30' 
+                        : isDone 
+                            ? 'bg-slate-800/90 text-cyan-300 border-cyan-500/40 hover:bg-slate-700' 
+                            : 'bg-slate-900/70 text-slate-400 border-slate-700 hover:text-white'
+                }`;
+                btn.innerHTML = `<span>${step.id}.</span><span class="truncate">${step.shortTitle}</span>`;
+                btn.onclick = () => {
+                    playUiBeep(660);
+                    currentStepIndex = idx;
+                    renderStep(idx);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderStep(index) {
+            const step = WUDUK_STEPS[index];
+            completedSteps.add(index);
+            updateProgressUI();
+            renderStepPills();
+
+            document.getElementById('step-badge-count').textContent = `LANGKAH ${step.id} / 6`;
+            document.getElementById('lesson-step-number').textContent = `RUKUN WUDUK #${step.id}`;
+            document.getElementById('lesson-title').textContent = step.title;
+            document.getElementById('lesson-description').textContent = step.description;
+            document.getElementById('hologram-target-label').textContent = step.targetLabel;
+            document.getElementById('tip-character-name').textContent = step.characterName;
+            document.getElementById('tip-character-text').textContent = `"${step.characterTip}"`;
+
+            // Senarai Poin Penting
+            const pointsList = document.getElementById('lesson-points');
+            pointsList.innerHTML = '';
+            step.points.forEach(pt => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-2.5 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800';
+                li.innerHTML = `
+                    <i class="fa-solid fa-circle-check text-mata-blue mt-1 shrink-0"></i>
+                    <span>${pt}</span>
+                `;
+                pointsList.appendChild(li);
+            });
+
+            // Kawalan Butang Sebelum & Seterusnya
+            document.getElementById('btn-prev-step').disabled = (index === 0);
+            const nextBtnText = document.getElementById('btn-next-text');
+            if (index === WUDUK_STEPS.length - 1) {
+                nextBtnText.textContent = "KE AKTIVITI CABARAN EJEN";
+            } else {
+                nextBtnText.textContent = "LANGKAH SETERUSNYA";
+            }
+
+            // Sembunyikan maklum balas klik lama
+            document.getElementById('body-part-feedback').classList.add('hidden');
+
+            // Kemas kini Hologram 3D untuk langkah semasa
+            update3DHologramForStep(step.hologramZone);
+        }
+
+        function prevStep() {
+            if (currentStepIndex > 0) {
+                playUiBeep(580);
+                currentStepIndex--;
+                renderStep(currentStepIndex);
+            }
+        }
+
+        function nextStep() {
+            playUiBeep(740);
+            if (currentStepIndex < WUDUK_STEPS.length - 1) {
+                currentStepIndex++;
+                renderStep(currentStepIndex);
+            } else {
+                navigateTo('quiz');
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // 5. ENJIN VISUAL 3D SINEMATIK & SIMULASI AIR (THREE.JS)
+        // -------------------------------------------------------------------------
+        let scene, camera, renderer, agentGroup, waterGroup, tapStreamMesh;
+        let bodyParts = {}; // Menyimpan mesh & sendi (joints) anatomi manusia 3D
+        let waterParticles = [];
+        let isDragging3D = false;
+        let prevMouseX = 0;
+        let targetRotationY = -0.35; // Sudut serong sedikit supaya nampak paip & gerakan jelas
+        let demoActionType = 'none';
+        let demoStartTime = 0;
+
+        function init3DScene() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x050A17, 0.04);
+
+            const width = container.clientWidth || 600;
+            const height = container.clientHeight || 420;
+
+            camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+            camera.position.set(0, 1.45, 4.9);
+            camera.lookAt(0, 1.15, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Pencahayaan Studio 3D Realistik (Key, Fill & Rim Light)
+            const ambientLight = new THREE.AmbientLight(0x7DD3FC, 0.65);
+            scene.add(ambientLight);
+
+            const keyLight = new THREE.DirectionalLight(0xFFFFFF, 1.35);
+            keyLight.position.set(2.5, 5.5, 4.5);
+            scene.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0x38BDF8, 0.55);
+            fillLight.position.set(-3.5, 2.5, 3.0);
+            scene.add(fillLight);
+
+            const rimLightRed = new THREE.PointLight(0xFF2A4B, 1.4, 9);
+            rimLightRed.position.set(-2.5, 2.2, -2.2);
+            scene.add(rimLightRed);
+
+            // Pentas Latihan Wuduk Futuristik MATA & Sinki/Paip Wuduk Realistik
+            buildTrainingStage();
+
+            // Model Anatomi Manusia 3D Ejen Ali Bersendi Penuh
+            buildAgent3DModel();
+
+            // Sistem Zarah Air & Pancuran Paip Realistik
+            buildWaterSystem();
+
+            // Kawalan Putaran Tetikus & Sentuhan + Raycaster Klik Anggota
+            setup3DInteractions(renderer.domElement);
+        }
+
+        function buildTrainingStage() {
+            // Lantai Grid Hologram
+            const gridHelper = new THREE.GridHelper(10, 20, 0x00E5FF, 0x0F294A);
+            gridHelper.position.y = -0.35;
+            scene.add(gridHelper);
+
+            // Platform Bulat MATA
+            const platformGeo = new THREE.CylinderGeometry(1.55, 1.75, 0.12, 36);
+            const platformMat = new THREE.MeshStandardMaterial({
+                color: 0x0D1730,
+                metalness: 0.75,
+                roughness: 0.2
+            });
+            const platform = new THREE.Mesh(platformGeo, platformMat);
+            platform.position.y = -0.3;
+            scene.add(platform);
+
+            // Gelung Cahaya Neon pada Platform
+            const ringGeo = new THREE.TorusGeometry(1.57, 0.022, 16, 64);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = -0.23;
+            scene.add(ring);
+
+            // Stesen Wuduk Moden M.A.T.A di Hadapan Ejen Ali (Z = +0.58)
+            const metalMat = new THREE.MeshStandardMaterial({ color: 0xCBD5E1, metalness: 0.85, roughness: 0.15 });
+            const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0F172A, metalness: 0.6, roughness: 0.1, transparent: true, opacity: 0.85 });
+
+            // Tiang Paip Utama
+            const standGeo = new THREE.CylinderGeometry(0.045, 0.065, 1.38, 20);
+            const stand = new THREE.Mesh(standGeo, metalMat);
+            stand.position.set(0, 0.35, 0.68);
+            scene.add(stand);
+
+            // Takungan Air Lutsinar Moden (Paras Pinggang)
+            const basinGeo = new THREE.CylinderGeometry(0.32, 0.22, 0.14, 24);
+            const basin = new THREE.Mesh(basinGeo, darkGlassMat);
+            basin.position.set(0, 0.96, 0.56);
+            scene.add(basin);
+
+            const basinRim = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.012, 12, 32), ringMat);
+            basinRim.rotation.x = Math.PI / 2;
+            basinRim.position.set(0, 1.03, 0.56);
+            scene.add(basinRim);
+
+            // Muncung Paip Menghala ke Arah Ejen Ali
+            const spoutGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.24, 16);
+            const spout = new THREE.Mesh(spoutGeo, metalMat);
+            spout.position.set(0, 1.24, 0.58);
+            spout.rotation.x = Math.PI / 2.3;
+            scene.add(spout);
+
+            // Paip Air Bawah (Untuk Basuhan Kaki)
+            const footSpout = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.22, 16), metalMat);
+            footSpout.position.set(0, 0.36, 0.58);
+            footSpout.rotation.x = Math.PI / 2.3;
+            scene.add(footSpout);
+        }
+
+        function createHoloMaterial(baseColor, roughness = 0.45, metalness = 0.15) {
+            return new THREE.MeshStandardMaterial({
+                color: baseColor,
+                roughness: roughness,
+                metalness: metalness,
+                emissive: 0x000000,
+                emissiveIntensity: 0.0
+            });
+        }
+
+        function buildAgent3DModel() {
+            agentGroup = new THREE.Group();
+            scene.add(agentGroup);
+
+            // Bahan Realistik Kulit Manusia & Sut Ejen Ali
+            const matSuitRed = createHoloMaterial(0xE11D48, 0.4, 0.2);
+            const matSuitDark = createHoloMaterial(0x1E293B, 0.5, 0.25);
+            const matSkin = createHoloMaterial(0xF6BA8A, 0.55, 0.05); // Warna kulit manusia semula jadi
+            const matHair = createHoloMaterial(0x111827, 0.7, 0.05);
+            const matShoe = createHoloMaterial(0x0F172A, 0.35, 0.3);
+            const matIris = new THREE.MeshStandardMaterial({
+                color: 0x00E5FF,
+                emissive: 0x00E5FF,
+                emissiveIntensity: 0.65,
+                roughness: 0.1
+            });
+
+            // -----------------------------------------------------------------
+            // A. PINGGUL & BADAN ATAS (TORSO ANATOMI)
+            // -----------------------------------------------------------------
+            const pelvis = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.18, 0.18, 20), matSuitDark);
+            pelvis.position.y = 0.76;
+            agentGroup.add(pelvis);
+
+            // Sendi Pinggang (Boleh membongkok sedikit ketika berwuduk)
+            const spinePivot = new THREE.Group();
+            spinePivot.position.set(0, 0.84, 0);
+            agentGroup.add(spinePivot);
+            bodyParts.spinePivot = spinePivot;
+
+            // Dada & Perut (Bentuk anatomi bahu lebih lebar dari pinggang)
+            const torsoGeo = new THREE.CylinderGeometry(0.24, 0.18, 0.54, 24);
+            const torso = new THREE.Mesh(torsoGeo, matSuitRed);
+            torso.scale.set(1.05, 1, 0.72); // Bentuk dada manusia realistik (pipih depan-belakang)
+            torso.position.y = 0.27;
+            torso.userData = { partKey: 'heart', name: 'HATI (TEMPAT NIAT)', info: 'Niat berlaku di dalam hati serentak ketika air mula mengenai muka.' };
+            spinePivot.add(torso);
+            bodyParts.torso = torso;
+
+            // Jalur Hitam Jaket Ejen Ali & Lambang MATA
+            const chestStripe = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.52, 0.36), matSuitDark);
+            chestStripe.position.y = 0.27;
+            spinePivot.add(chestStripe);
+
+            // Simbol Hati Hologram di Dada Kiri
+            const heartGeo = new THREE.OctahedronGeometry(0.085, 1);
+            const heartMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF, wireframe: true });
+            const heartHolo = new THREE.Mesh(heartGeo, heartMat);
+            heartHolo.position.set(0.09, 0.36, 0.21);
+            heartHolo.userData = torso.userData;
+            spinePivot.add(heartHolo);
+            bodyParts.heart = heartHolo;
+
+            // -----------------------------------------------------------------
+            // B. LEHER, KEPALA & CIRI WAJAH MANUSIA REALISTIK
+            // -----------------------------------------------------------------
+            const neckPivot = new THREE.Group();
+            neckPivot.position.set(0, 0.55, 0);
+            spinePivot.add(neckPivot);
+            bodyParts.neckPivot = neckPivot;
+
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.082, 0.14, 16), matSkin);
+            neck.position.y = 0.06;
+            neckPivot.add(neck);
+
+            // Kepala Bujur Anatomi Manusia (Bukan bola bulat semata-mata)
+            const faceGeo = new THREE.SphereGeometry(0.205, 28, 28);
+            const face = new THREE.Mesh(faceGeo, matSkin);
+            face.scale.set(0.92, 1.12, 0.96);
+            face.position.y = 0.28;
+            face.userData = { partKey: 'face', name: 'SELURUH MUKA', info: 'Wajib diratakan air dari tempat tumbuh rambut di dahi hingga bawah dagu, dan dari telinga kanan ke telinga kiri.' };
+            neckPivot.add(face);
+            bodyParts.face = face;
+
+            // Telinga Kiri & Kanan (Sempadan Tepi Muka)
+            const earGeo = new THREE.SphereGeometry(0.038, 12, 12);
+            const leftEar = new THREE.Mesh(earGeo, matSkin);
+            leftEar.scale.set(0.5, 1.3, 0.8);
+            leftEar.position.set(0.19, 0.27, 0.0);
+            neckPivot.add(leftEar);
+
+            const rightEar = new THREE.Mesh(earGeo, matSkin);
+            rightEar.scale.set(0.5, 1.3, 0.8);
+            rightEar.position.set(-0.19, 0.27, 0.0);
+            neckPivot.add(rightEar);
+
+            // Hidung & Dagu (Untuk kedalaman wajah 3D yang jelas)
+            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.06, 12), matSkin);
+            nose.rotation.x = Math.PI / 2;
+            nose.position.set(0, 0.26, 0.20);
+            neckPivot.add(nose);
+
+            // Bingkai Hologram Sempadan Muka (Dahi ke Dagu, Telinga ke Telinga)
+            const faceRimGeo = new THREE.TorusGeometry(0.21, 0.011, 12, 36);
+            const faceRimMat = new THREE.MeshBasicMaterial({ color: 0x00E5FF, transparent: true, opacity: 0.0 });
+            const faceRim = new THREE.Mesh(faceRimGeo, faceRimMat);
+            faceRim.scale.set(0.88, 1.1, 1);
+            faceRim.position.set(0, 0.27, 0.08);
+            neckPivot.add(faceRim);
+            bodyParts.faceRim = faceRim;
+
+            // Bahagian Atas Kepala / Rambut (Wajib Sapu Sebahagian Kepala)
+            const crownGeo = new THREE.SphereGeometry(0.215, 24, 18, 0, Math.PI * 2, 0, Math.PI * 0.54);
+            const crown = new THREE.Mesh(crownGeo, matHair);
+            crown.scale.set(0.95, 1.08, 1.02);
+            crown.position.set(0, 0.29, -0.01);
+            crown.userData = { partKey: 'head', name: 'SEBAHAGIAN KEPALA', info: 'Wajib menyapu sebahagian kepala menggunakan tangan yang basah (bukan membasuh seluruh kepala).' };
+            neckPivot.add(crown);
+            bodyParts.head = crown;
+
+            // Rambut Pacak Ikonik Ejen Ali
+            const spike1 = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.14, 10), matHair);
+            spike1.position.set(0.03, 0.53, 0.04);
+            spike1.rotation.z = -0.3;
+            neckPivot.add(spike1);
+
+            const spike2 = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 10), matHair);
+            spike2.position.set(-0.05, 0.51, 0.01);
+            spike2.rotation.z = 0.35;
+            neckPivot.add(spike2);
+
+            // Kaca Mata IRIS Ejen Ali
+            const visorGeo = new THREE.BoxGeometry(0.31, 0.072, 0.09);
+            const visor = new THREE.Mesh(visorGeo, matIris);
+            visor.position.set(0, 0.31, 0.175);
+            neckPivot.add(visor);
+
+            // -----------------------------------------------------------------
+            // C. SISTEM LENGAN BERSENDI MANUSIA (BAHU -> SIKU -> LENGAN BAWAH -> TAPAK TANGAN)
+            // -----------------------------------------------------------------
+            function createHumanArm(isLeft) {
+                const side = isLeft ? 1 : -1;
+                const armUserData = {
+                    partKey: 'arms',
+                    name: isLeft ? 'TANGAN KIRI HINGGA SIKU' : 'TANGAN KANAN HINGGA SIKU',
+                    info: 'Wajib membasuh kedua-dua tangan bermula dari hujung jari hingga melepasi kedua-dua siku.'
+                };
+
+                // 1. Sendi Bahu (Shoulder Pivot)
+                const shoulderPivot = new THREE.Group();
+                shoulderPivot.position.set(side * 0.28, 0.48, 0);
+                spinePivot.add(shoulderPivot);
+
+                const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), matSuitRed);
+                shoulderPivot.add(shoulderCap);
+
+                // Lengan Atas (Bicep - Lengan Baju Ejen Ali)
+                const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.054, 0.28, 16), matSuitDark);
+                upperArm.position.y = -0.14;
+                shoulderPivot.add(upperArm);
+
+                // 2. Sendi Siku (Elbow Pivot - Boleh Membengkok Realistik!)
+                const elbowPivot = new THREE.Group();
+                elbowPivot.position.set(0, -0.28, 0);
+                shoulderPivot.add(elbowPivot);
+
+                const elbowJoint = new THREE.Mesh(new THREE.SphereGeometry(0.054, 16, 16), matSkin);
+                elbowJoint.userData = armUserData;
+                elbowPivot.add(elbowJoint);
+
+                // Gelung Hologram Siku (Penanda Sempadan Wajib)
+                const elbowRing = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.068, 0.012, 10, 24),
+                    new THREE.MeshBasicMaterial({ color: 0x00E5FF })
+                );
+                elbowRing.rotation.x = Math.PI / 2;
+                elbowPivot.add(elbowRing);
+
+                // Lengan Bawah (Forearm - Kulit Terdedah untuk Wuduk)
+                const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.04, 0.27, 16), matSkin);
+                forearm.position.y = -0.135;
+                forearm.userData = armUserData;
+                elbowPivot.add(forearm);
+
+                // 3. Sendi Pergelangan & Tapak Tangan Manusia + Jari
+                const wristPivot = new THREE.Group();
+                wristPivot.position.set(0, -0.28, 0);
+                elbowPivot.add(wristPivot);
+
+                // Tapak Tangan
+                const palm = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.085, 0.028), matSkin);
+                palm.position.y = -0.04;
+                palm.userData = armUserData;
+                wristPivot.add(palm);
+
+                // 4 Jari + Ibu Jari
+                const fingers = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.065, 0.022), matSkin);
+                fingers.position.set(0, -0.11, 0.005);
+                fingers.rotation.x = 0.15;
+                fingers.userData = armUserData;
+                wristPivot.add(fingers);
+
+                const thumb = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.05, 0.022), matSkin);
+                thumb.position.set(-side * 0.045, -0.05, 0.015);
+                thumb.rotation.z = side * 0.4;
+                wristPivot.add(thumb);
+
+                return { shoulderPivot, elbowPivot, wristPivot, forearm, palm, fingers, elbowRing };
+            }
+
+            bodyParts.leftArmRig = createHumanArm(true);
+            bodyParts.rightArmRig = createHumanArm(false);
+
+            // -----------------------------------------------------------------
+            // D. SISTEM KAKI BERSENDI MANUSIA (PINGGUL -> LUTUT -> BETIS -> BUKU LALI -> TAPAK KAKI)
+            // -----------------------------------------------------------------
+            function createHumanLeg(isLeft) {
+                const side = isLeft ? 1 : -1;
+                const legUserData = {
+                    partKey: 'feet',
+                    name: isLeft ? 'KAKI KIRI HINGGA BUKU LALI' : 'KAKI KANAN HINGGA BUKU LALI',
+                    info: 'Wajib membasuh kedua-dua kaki bermula dari hujung jari kaki hingga melepasi buku lali.'
+                };
+
+                // Sendi Pinggul (Hip Pivot)
+                const hipPivot = new THREE.Group();
+                hipPivot.position.set(side * 0.115, 0.68, 0);
+                agentGroup.add(hipPivot);
+
+                // Paha (Thigh)
+                const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.068, 0.36, 16), matSuitDark);
+                thigh.position.y = -0.18;
+                hipPivot.add(thigh);
+
+                // Sendi Lutut (Knee Pivot)
+                const kneePivot = new THREE.Group();
+                kneePivot.position.set(0, -0.36, 0);
+                hipPivot.add(kneePivot);
+
+                const kneeJoint = new THREE.Mesh(new THREE.SphereGeometry(0.066, 14, 14), matSuitDark);
+                kneePivot.add(kneeJoint);
+
+                // Betis Bawah (Shin - Kulit Terdedah untuk Wuduk)
+                const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.048, 0.34, 16), matSkin);
+                shin.position.y = -0.17;
+                shin.userData = legUserData;
+                kneePivot.add(shin);
+
+                // Sendi Buku Lali (Ankle Pivot)
+                const anklePivot = new THREE.Group();
+                anklePivot.position.set(0, -0.34, 0);
+                kneePivot.add(anklePivot);
+
+                // Tulang Buku Lali (Malleolus - Kiri & Kanan Pergelangan Kaki)
+                const malleolusOut = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 10), matSkin);
+                malleolusOut.position.set(side * 0.048, 0.01, 0);
+                anklePivot.add(malleolusOut);
+
+                const malleolusIn = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 10), matSkin);
+                malleolusIn.position.set(-side * 0.048, 0.01, 0);
+                anklePivot.add(malleolusIn);
+
+                // Gelung Hologram Buku Lali (Penanda Sempadan Wajib)
+                const ankleRing = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.075, 0.013, 10, 24),
+                    new THREE.MeshBasicMaterial({ color: 0x00E5FF })
+                );
+                ankleRing.rotation.x = Math.PI / 2;
+                ankleRing.position.y = 0.015;
+                anklePivot.add(ankleRing);
+
+                // Tapak Kaki & Jari Kaki Manusia (Terdedah untuk Basuhan Wuduk)
+                const footBase = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.055, 0.21), matSkin);
+                footBase.position.set(0, -0.035, 0.045);
+                footBase.userData = legUserData;
+                anklePivot.add(footBase);
+
+                const toes = new THREE.Mesh(new THREE.BoxGeometry(0.092, 0.035, 0.06), matSkin);
+                toes.position.set(0, -0.045, 0.16);
+                toes.userData = legUserData;
+                anklePivot.add(toes);
+
+                return { hipPivot, kneePivot, anklePivot, shin, footBase, toes, ankleRing };
+            }
+
+            bodyParts.leftLegRig = createHumanLeg(true);
+            bodyParts.rightLegRig = createHumanLeg(false);
+
+            // Tetapkan postur berdiri semula jadi
+            resetHumanPose();
+        }
+
+        function resetHumanPose() {
+            if (!bodyParts.leftArmRig) return;
+
+            // Badan tegak semula jadi
+            bodyParts.spinePivot.rotation.set(0, 0, 0);
+            bodyParts.neckPivot.rotation.set(0, 0, 0);
+
+            // Lengan kiri & kanan rileks di sisi badan
+            bodyParts.leftArmRig.shoulderPivot.rotation.set(-0.15, 0, 0.12);
+            bodyParts.leftArmRig.elbowPivot.rotation.set(-0.35, 0, 0);
+            bodyParts.leftArmRig.wristPivot.rotation.set(0, 0, 0);
+
+            bodyParts.rightArmRig.shoulderPivot.rotation.set(-0.15, 0, -0.12);
+            bodyParts.rightArmRig.elbowPivot.rotation.set(-0.35, 0, 0);
+            bodyParts.rightArmRig.wristPivot.rotation.set(0, 0, 0);
+
+            // Kaki berdiri tegak
+            bodyParts.leftLegRig.hipPivot.rotation.set(0, 0, 0);
+            bodyParts.leftLegRig.kneePivot.rotation.set(0, 0, 0);
+            bodyParts.leftLegRig.anklePivot.rotation.set(0, 0, 0);
+
+            bodyParts.rightLegRig.hipPivot.rotation.set(0, 0, 0);
+            bodyParts.rightLegRig.kneePivot.rotation.set(0, 0, 0);
+            bodyParts.rightLegRig.anklePivot.rotation.set(0, 0, 0);
+        }
+
+        function buildWaterSystem() {
+            waterGroup = new THREE.Group();
+            scene.add(waterGroup);
+
+            // Pancuran Air Utama dari Muncung Paip
+            const streamGeo = new THREE.CylinderGeometry(0.012, 0.018, 0.28, 12);
+            const streamMat = new THREE.MeshBasicMaterial({
+                color: 0x38BDF8,
+                transparent: true,
+                opacity: 0.75
+            });
+            tapStreamMesh = new THREE.Mesh(streamGeo, streamMat);
+            tapStreamMesh.position.set(0, 1.11, 0.49);
+            tapStreamMesh.visible = false;
+            waterGroup.add(tapStreamMesh);
+
+            // Zarah-zarah Titisan & Percikan Air
+            const dropGeo = new THREE.SphereGeometry(0.02, 8, 8);
+            const dropMat = new THREE.MeshBasicMaterial({
+                color: 0x7DD3FC,
+                transparent: true,
+                opacity: 0.88
+            });
+
+            for (let i = 0; i < 85; i++) {
+                const drop = new THREE.Mesh(dropGeo, dropMat);
+                drop.visible = false;
+                drop.userData = {
+                    vx: (Math.random() - 0.5) * 0.015,
+                    vy: -0.025 - Math.random() * 0.025,
+                    vz: (Math.random() - 0.5) * 0.015
+                };
+                waterGroup.add(drop);
+                waterParticles.push(drop);
+            }
+        }
+
+        function update3DHologramForStep(zone) {
+            if (!bodyParts.face) return;
+
+            // Reset semua emissive
+            const allMeshes = [
+                bodyParts.torso, bodyParts.face, bodyParts.head,
+                bodyParts.leftArmRig.forearm, bodyParts.leftArmRig.palm, bodyParts.leftArmRig.fingers,
+                bodyParts.rightArmRig.forearm, bodyParts.rightArmRig.palm, bodyParts.rightArmRig.fingers,
+                bodyParts.leftLegRig.shin, bodyParts.leftLegRig.footBase, bodyParts.leftLegRig.toes,
+                bodyParts.rightLegRig.shin, bodyParts.rightLegRig.footBase, bodyParts.rightLegRig.toes
+            ];
+
+            allMeshes.forEach(mesh => {
+                if (mesh && mesh.material) {
+                    mesh.material.emissive.setHex(0x000000);
+                    mesh.material.emissiveIntensity = 0;
+                }
+            });
+            bodyParts.faceRim.material.opacity = 0;
+            bodyParts.heart.scale.set(1, 1, 1);
+
+            const holoBlue = 0x00E5FF;
+
+            if (zone === 'heart_face') {
+                bodyParts.torso.material.emissive.setHex(0x0284C7);
+                bodyParts.torso.material.emissiveIntensity = 0.4;
+                bodyParts.face.material.emissive.setHex(holoBlue);
+                bodyParts.face.material.emissiveIntensity = 0.35;
+                bodyParts.faceRim.material.opacity = 0.85;
+                bodyParts.heart.scale.set(1.5, 1.5, 1.5);
+                camera.position.set(0, 1.4, 4.3);
+            } else if (zone === 'face') {
+                bodyParts.face.material.emissive.setHex(holoBlue);
+                bodyParts.face.material.emissiveIntensity = 0.65;
+                bodyParts.faceRim.material.opacity = 1.0;
+                camera.position.set(0, 1.55, 3.5);
+            } else if (zone === 'arms') {
+                [bodyParts.leftArmRig, bodyParts.rightArmRig].forEach(arm => {
+                    arm.forearm.material.emissive.setHex(holoBlue);
+                    arm.forearm.material.emissiveIntensity = 0.65;
+                    arm.palm.material.emissive.setHex(holoBlue);
+                    arm.palm.material.emissiveIntensity = 0.65;
+                    arm.fingers.material.emissive.setHex(holoBlue);
+                    arm.fingers.material.emissiveIntensity = 0.65;
+                });
+                camera.position.set(0, 1.25, 3.9);
+            } else if (zone === 'head') {
+                bodyParts.head.material.emissive.setHex(holoBlue);
+                bodyParts.head.material.emissiveIntensity = 0.85;
+                camera.position.set(0, 1.65, 3.5);
+            } else if (zone === 'feet') {
+                [bodyParts.leftLegRig, bodyParts.rightLegRig].forEach(leg => {
+                    leg.shin.material.emissive.setHex(holoBlue);
+                    leg.shin.material.emissiveIntensity = 0.55;
+                    leg.footBase.material.emissive.setHex(holoBlue);
+                    leg.footBase.material.emissiveIntensity = 0.75;
+                    leg.toes.material.emissive.setHex(holoBlue);
+                    leg.toes.material.emissiveIntensity = 0.75;
+                });
+                camera.position.set(0, 0.55, 3.7);
+            } else if (zone === 'all') {
+                allMeshes.forEach(mesh => {
+                    mesh.material.emissive.setHex(holoBlue);
+                    mesh.material.emissiveIntensity = 0.4;
+                });
+                bodyParts.faceRim.material.opacity = 0.9;
+                camera.position.set(0, 1.15, 4.9);
+            }
+        }
+
+        function highlightTargetZone() {
+            playUiBeep(880);
+            const step = WUDUK_STEPS[currentStepIndex];
+            update3DHologramForStep(step.hologramZone);
+            
+            const feedbackBox = document.getElementById('body-part-feedback');
+            document.getElementById('feedback-part-title').textContent = `IMBASAN HOLOGRAM: ${step.shortTitle.toUpperCase()}`;
+            document.getElementById('feedback-part-desc').textContent = step.targetLabel;
+            feedbackBox.classList.remove('hidden');
+        }
+
+        function triggerDemonstration() {
+            playUiBeep(950);
+            const step = WUDUK_STEPS[currentStepIndex];
+            isDemonstrating = true;
+            demoActionType = step.hologramZone;
+            demoStartTime = performance.now();
+
+            // Papar lencana status demonstrasi
+            const statusBadge = document.getElementById('demo-status-badge');
+            const statusText = document.getElementById('demo-status-text');
+            statusBadge.classList.remove('hidden');
+
+            const actionDescriptions = {
+                'heart_face': 'MENADAH AIR & BERNIAT KETIKA AIR MENGENAI MUKA',
+                'face': 'MERATAKAN AIR KE SELURUH MUKA (DAHI KE DAGU, TELINGA KE TELINGA)',
+                'arms': 'MEMBASUH KEDUA-DUA TANGAN DARI HUJUNG JARI MELEPASI SIKU',
+                'head': 'MENYAPU SEBAHAGIAN KEPALA DENGAN TANGAN BASAH',
+                'feet': 'MEMBASUH KEDUA-DUA KAKI DARI JARI KAKI MELEPASI BUKU LALI',
+                'all': 'MELAKSANAKAN KEENAM-ENAM RUKUN MENGIKUT TERTIB'
+            };
+            statusText.textContent = actionDescriptions[demoActionType] || 'SIMULASI AKTIF';
+
+            // Aktifkan pancuran paip & titisan air
+            if (tapStreamMesh) {
+                tapStreamMesh.visible = (demoActionType !== 'feet');
+            }
+            waterParticles.forEach(p => {
+                p.visible = true;
+                resetWaterParticle(p, demoActionType);
+            });
+
+            showToast(`Simulasi 3D: ${step.shortTitle}`);
+
+            clearTimeout(demoTimer);
+            demoTimer = setTimeout(() => {
+                isDemonstrating = false;
+                statusBadge.classList.add('hidden');
+                if (tapStreamMesh) tapStreamMesh.visible = false;
+                waterParticles.forEach(p => p.visible = false);
+                resetHumanPose();
+            }, 6000);
+        }
+
+        function resetWaterParticle(p, zone) {
+            if (zone === 'face' || zone === 'heart_face') {
+                // Air mengalir di kawasan muka (dahi ke dagu)
+                p.position.set((Math.random() - 0.5) * 0.28, 1.72 + Math.random() * 0.14, 0.26);
+            } else if (zone === 'head') {
+                // Titisan air pada bahagian atas kepala semasa sapuan
+                p.position.set((Math.random() - 0.5) * 0.24, 1.88 + Math.random() * 0.08, (Math.random() - 0.5) * 0.16);
+            } else if (zone === 'arms') {
+                // Air mengalir sepanjang lengan bawah dari siku ke hujung jari
+                const side = Math.random() > 0.5 ? 0.22 : -0.22;
+                p.position.set(side + (Math.random() - 0.5) * 0.12, 1.15 + Math.random() * 0.18, 0.35 + Math.random() * 0.15);
+            } else if (zone === 'feet') {
+                // Air mencurah ke kaki & buku lali
+                p.position.set((Math.random() - 0.5) * 0.24, 0.32 + Math.random() * 0.15, 0.22 + Math.random() * 0.18);
+            } else {
+                p.position.set((Math.random() - 0.5) * 0.3, 1.15 + Math.random() * 0.2, 0.45);
+            }
+        }
+
+        function setup3DInteractions(domElement) {
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            let downX = 0, downY = 0;
+
+            const handlePointerDown = (clientX, clientY) => {
+                isDragging3D = true;
+                prevMouseX = clientX;
+                downX = clientX;
+                downY = clientY;
+            };
+
+            const handlePointerMove = (clientX) => {
+                if (!isDragging3D) return;
+                const deltaX = clientX - prevMouseX;
+                targetRotationY += deltaX * 0.012;
+                prevMouseX = clientX;
+            };
+
+            const handlePointerUp = (clientX, clientY) => {
+                isDragging3D = false;
+                if (Math.abs(clientX - downX) < 6 && Math.abs(clientY - downY) < 6) {
+                    const rect = domElement.getBoundingClientRect();
+                    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+                    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(agentGroup.children, true);
+                    for (let i = 0; i < intersects.length; i++) {
+                        const obj = intersects[i].object;
+                        if (obj.userData && obj.userData.name) {
+                            playUiBeep(820);
+                            const feedbackBox = document.getElementById('body-part-feedback');
+                            document.getElementById('feedback-part-title').textContent = obj.userData.name;
+                            document.getElementById('feedback-part-desc').textContent = obj.userData.info;
+                            feedbackBox.classList.remove('hidden');
+                            break;
+                        }
+                    }
+                }
+            };
+
+            domElement.addEventListener('mousedown', e => handlePointerDown(e.clientX, e.clientY));
+            window.addEventListener('mousemove', e => handlePointerMove(e.clientX));
+            window.addEventListener('mouseup', e => {
+                if (isDragging3D) handlePointerUp(e.clientX, e.clientY);
+            });
+
+            domElement.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            domElement.addEventListener('touchmove', e => {
+                if (e.touches.length === 1) handlePointerMove(e.touches[0].clientX);
+            }, { passive: true });
+            domElement.addEventListener('touchend', e => {
+                if (e.changedTouches.length === 1) handlePointerUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            });
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            if (!renderer || !scene || !camera) return;
+
+            const time = Date.now() * 0.003;
+
+            if (agentGroup) {
+                agentGroup.rotation.y += (targetRotationY - agentGroup.rotation.y) * 0.1;
+
+                if (bodyParts.heart) {
+                    bodyParts.heart.rotation.y += 0.035;
+                }
+
+                // -------------------------------------------------------------
+                // ANIMASI BIOMEKANIK TUBUH MANUSIA REALISTIK SEMASA DEMONSTRASI
+                // -------------------------------------------------------------
+                if (isDemonstrating && bodyParts.leftArmRig) {
+                    const elapsed = (performance.now() - demoStartTime) / 1000; // 0 hingga 6 saat
+                    const L = bodyParts.leftArmRig;
+                    const R = bodyParts.rightArmRig;
+
+                    if (demoActionType === 'face' || demoActionType === 'heart_face') {
+                        // Fasa 1 (0 - 1.5s): Menadah kedua-dua tapak tangan di bawah paip air
+                        // Fasa 2 (1.5s - 6s): Membawa kedua-dua tapak tangan ke muka & meratakan dari dahi ke dagu dan telinga ke telinga
+                        const phase = elapsed % 3.0;
+                        if (phase < 1.0) {
+                            // Tadahan air di paip
+                            bodyParts.spinePivot.rotation.x = 0.14;
+                            bodyParts.neckPivot.rotation.x = 0.12;
+                            L.shoulderPivot.rotation.set(-0.65, 0.25, -0.15);
+                            L.elbowPivot.rotation.set(-1.1, 0, 0);
+                            L.wristPivot.rotation.set(0.3, 0, 0.4);
+
+                            R.shoulderPivot.rotation.set(-0.65, -0.25, 0.15);
+                            R.elbowPivot.rotation.set(-1.1, 0, 0);
+                            R.wristPivot.rotation.set(0.3, 0, -0.4);
+                        } else {
+                            // Menyapu & meratakan air ke seluruh muka (dahi -> dagu, telinga kanan -> kiri)
+                            const sweepY = Math.sin((phase - 1.0) * Math.PI * 2); // Atas ke bawah muka
+                            const sweepX = Math.cos((phase - 1.0) * Math.PI * 2); // Kiri ke kanan muka
+                            bodyParts.spinePivot.rotation.x = 0.08;
+                            bodyParts.neckPivot.rotation.x = -0.05;
+
+                            L.shoulderPivot.rotation.set(-1.25 + sweepY * 0.18, 0.35, -0.25 - sweepX * 0.08);
+                            L.elbowPivot.rotation.set(-1.75 + sweepY * 0.15, 0, 0);
+                            L.wristPivot.rotation.set(0.2, -0.4, 0.2);
+
+                            R.shoulderPivot.rotation.set(-1.25 + sweepY * 0.18, -0.35, 0.25 + sweepX * 0.08);
+                            R.elbowPivot.rotation.set(-1.75 + sweepY * 0.15, 0, 0);
+                            R.wristPivot.rotation.set(0.2, 0.4, -0.2);
+                        }
+                    } else if (demoActionType === 'arms') {
+                        // Fasa bergilir: Tangan kiri membasuh tangan kanan dari jari hingga melepasi siku, kemudian sebaliknya
+                        const isWashingRight = Math.floor(elapsed / 2.5) % 2 === 0;
+                        const rub = Math.sin(elapsed * 6); // Gerakan menggosok ke atas & bawah lengan
+                        bodyParts.spinePivot.rotation.x = 0.12;
+
+                        if (isWashingRight) {
+                            // Tangan kanan dihulur ke hadapan bawah air, tangan kiri menggosok dari jari ke siku kanan
+                            R.shoulderPivot.rotation.set(-0.75, -0.2, 0.1);
+                            R.elbowPivot.rotation.set(-0.55, 0, 0);
+
+                            L.shoulderPivot.rotation.set(-0.85, 0.55, -0.35);
+                            L.elbowPivot.rotation.set(-1.1 + rub * 0.45, 0, 0);
+                        } else {
+                            // Tangan kiri dihulur ke hadapan, tangan kanan menggosok dari jari ke siku kiri
+                            L.shoulderPivot.rotation.set(-0.75, 0.2, -0.1);
+                            L.elbowPivot.rotation.set(-0.55, 0, 0);
+
+                            R.shoulderPivot.rotation.set(-0.85, -0.55, 0.35);
+                            R.elbowPivot.rotation.set(-1.1 + rub * 0.45, 0, 0);
+                        }
+                    } else if (demoActionType === 'head') {
+                        // Membasahkan tangan kemudian menyapu sebahagian atas kepala dari depan ke belakang
+                        const sweep = Math.sin(elapsed * 3.5);
+                        bodyParts.spinePivot.rotation.x = 0.1;
+                        bodyParts.neckPivot.rotation.x = 0.18; // Menundukkan kepala sedikit
+
+                        R.shoulderPivot.rotation.set(-1.65 + sweep * 0.22, -0.25, 0.25);
+                        R.elbowPivot.rotation.set(-1.75 - sweep * 0.15, 0, 0);
+                        R.wristPivot.rotation.set(-0.3, 0, 0);
+
+                        L.shoulderPivot.rotation.set(-0.3, 0, 0.15);
+                        L.elbowPivot.rotation.set(-0.5, 0, 0);
+                    } else if (demoActionType === 'feet') {
+                        // Mengangkat kaki kanan ke hadapan dan tangan menggosok kaki dari jari hingga melepasi buku lali
+                        const isRightFoot = Math.floor(elapsed / 3.0) % 2 === 0;
+                        const rubFoot = Math.sin(elapsed * 5);
+                        bodyParts.spinePivot.rotation.x = 0.28; // Membongkok sedikit ke hadapan
+
+                        if (isRightFoot) {
+                            bodyParts.rightLegRig.hipPivot.rotation.set(-0.65, 0, 0);
+                            bodyParts.rightLegRig.kneePivot.rotation.set(0.75, 0, 0);
+                            bodyParts.leftLegRig.hipPivot.rotation.set(0, 0, 0);
+                            bodyParts.leftLegRig.kneePivot.rotation.set(0, 0, 0);
+
+                            R.shoulderPivot.rotation.set(-1.05, -0.15, 0.1);
+                            R.elbowPivot.rotation.set(-0.45 + rubFoot * 0.25, 0, 0);
+                            L.shoulderPivot.rotation.set(-1.05, 0.25, -0.15);
+                            L.elbowPivot.rotation.set(-0.55 - rubFoot * 0.25, 0, 0);
+                        } else {
+                            bodyParts.leftLegRig.hipPivot.rotation.set(-0.65, 0, 0);
+                            bodyParts.leftLegRig.kneePivot.rotation.set(0.75, 0, 0);
+                            bodyParts.rightLegRig.hipPivot.rotation.set(0, 0, 0);
+                            bodyParts.rightLegRig.kneePivot.rotation.set(0, 0, 0);
+
+                            L.shoulderPivot.rotation.set(-1.05, 0.15, -0.1);
+                            L.elbowPivot.rotation.set(-0.45 + rubFoot * 0.25, 0, 0);
+                            R.shoulderPivot.rotation.set(-1.05, -0.25, 0.15);
+                            R.elbowPivot.rotation.set(-0.55 - rubFoot * 0.25, 0, 0);
+                        }
+                    } else if (demoActionType === 'all') {
+                        // Turutan ringkas tertib (Muka -> Tangan -> Kepala -> Kaki)
+                        const stage = Math.floor(elapsed / 1.5) % 4;
+                        if (stage === 0) {
+                            L.shoulderPivot.rotation.set(-1.25, 0.35, -0.2);
+                            L.elbowPivot.rotation.set(-1.7, 0, 0);
+                            R.shoulderPivot.rotation.set(-1.25, -0.35, 0.2);
+                            R.elbowPivot.rotation.set(-1.7, 0, 0);
+                        } else if (stage === 1) {
+                            L.shoulderPivot.rotation.set(-0.8, 0.4, -0.2);
+                            L.elbowPivot.rotation.set(-0.9, 0, 0);
+                            R.shoulderPivot.rotation.set(-0.75, -0.2, 0.1);
+                            R.elbowPivot.rotation.set(-0.5, 0, 0);
+                        } else if (stage === 2) {
+                            R.shoulderPivot.rotation.set(-1.6, -0.25, 0.25);
+                            R.elbowPivot.rotation.set(-1.75, 0, 0);
+                        } else {
+                            bodyParts.rightLegRig.hipPivot.rotation.set(-0.55, 0, 0);
+                            bodyParts.rightLegRig.kneePivot.rotation.set(0.65, 0, 0);
+                        }
+                    }
+                }
+            }
+
+            // Kemas kini Zarah Air
+            if (isDemonstrating) {
+                waterParticles.forEach(p => {
+                    p.position.y += p.userData.vy;
+                    p.position.x += p.userData.vx;
+                    if (p.position.y < -0.2) {
+                        resetWaterParticle(p, demoActionType);
+                    }
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !renderer || !camera) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            if (width > 0 && height > 0) {
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+        }
+        window.addEventListener('resize', onWindowResize);
+
+        // -------------------------------------------------------------------------
+        // 6. AKTIVITI INTERAKTIF: DRAG & DROP + TAP-TO-PLACE (CABARAN EJEN)
+        // -------------------------------------------------------------------------
+        let slotAssignments = [null, null, null, null, null, null];
+        let selectedBankCardId = null;
+
+        function initQuiz() {
+            slotAssignments = [null, null, null, null, null, null];
+            selectedBankCardId = null;
+            document.getElementById('quiz-score-display').textContent = '0 / 100';
+            document.getElementById('quiz-feedback-panel').classList.add('hidden');
+            document.getElementById('btn-to-summary').classList.add('hidden');
+            document.getElementById('btn-check-quiz').classList.remove('hidden');
+
+            // Susun kad secara rawak
+            const shuffled = [...WUDUK_STEPS].sort(() => Math.random() - 0.5);
+            renderQuizBoard(shuffled);
+        }
+
+        function resetQuiz() {
+            playUiBeep(600);
+            initQuiz();
+            showToast("Susunan kad telah ditetapkan semula secara rawak.");
+        }
+
+        function renderQuizBoard(bankItems) {
+            const bankEl = document.getElementById('quiz-card-bank');
+            const slotsEl = document.getElementById('quiz-slots-container');
+            bankEl.innerHTML = '';
+            slotsEl.innerHTML = '';
+
+            // Papar kad yang belum dimasukkan ke dalam slot
+            const assignedIds = new Set(slotAssignments.filter(id => id !== null));
+            const availableCards = bankItems.filter(item => !assignedIds.has(item.id));
+
+            if (availableCards.length === 0) {
+                bankEl.innerHTML = `
+                    <div class="h-full min-h-[260px] flex flex-col items-center justify-center text-center text-slate-400 p-4">
+                        <i class="fa-solid fa-check-circle text-3xl text-cyan-400 mb-2"></i>
+                        <p class="text-sm font-medium">Semua 6 kad telah diletakkan ke dalam slot urutan!</p>
+                        <p class="text-xs mt-1">Tekan butang <strong>SEMAK JAWAPAN MISI</strong> di bawah.</p>
+                    </div>
+                `;
+            } else {
+                availableCards.forEach(item => {
+                    const card = createDraggableCard(item, false);
+                    bankEl.appendChild(card);
+                });
+            }
+
+            // Papar 6 Slot Urutan
+            for (let i = 0; i < 6; i++) {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'drop-zone rounded-2xl p-2.5 bg-slate-900/80 border-2 border-dashed border-slate-700 flex items-center gap-3 min-h-[64px]';
+                slotDiv.dataset.slotIndex = i;
+
+                // Drag Events
+                slotDiv.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    slotDiv.classList.add('drag-over');
+                });
+                slotDiv.addEventListener('dragleave', () => {
+                    slotDiv.classList.remove('drag-over');
+                });
+                slotDiv.addEventListener('drop', e => {
+                    e.preventDefault();
+                    slotDiv.classList.remove('drag-over');
+                    const cardId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    if (!isNaN(cardId)) {
+                        assignCardToSlot(cardId, i);
+                    }
+                });
+
+                // Tap-to-place untuk sokongan penuh skrin sentuh mudah alih
+                slotDiv.addEventListener('click', () => {
+                    if (selectedBankCardId !== null) {
+                        assignCardToSlot(selectedBankCardId, i);
+                        selectedBankCardId = null;
+                    }
+                });
+
+                const numBadge = document.createElement('div');
+                numBadge.className = 'w-9 h-9 rounded-xl bg-slate-800 border border-cyan-500/30 flex items-center justify-center font-orbitron font-black text-sm text-mata-blue shrink-0';
+                numBadge.textContent = i + 1;
+                slotDiv.appendChild(numBadge);
+
+                const assignedId = slotAssignments[i];
+                if (assignedId !== null) {
+                    const item = WUDUK_STEPS.find(s => s.id === assignedId);
+                    const placedCard = createDraggableCard(item, true, i);
+                    slotDiv.appendChild(placedCard);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'text-xs text-slate-400 italic flex-grow';
+                    placeholder.textContent = selectedBankCardId !== null 
+                        ? 'Klik di sini untuk meletakkan kad yang dipilih...' 
+                        : `Letakkan Rukun Wuduk ke-${i + 1} di sini`;
+                    slotDiv.appendChild(placeholder);
+                }
+
+                slotsEl.appendChild(slotDiv);
+            }
+        }
+
+        function createDraggableCard(item, isPlaced, slotIndex = -1) {
+            const div = document.createElement('div');
+            const isSelected = selectedBankCardId === item.id;
+
+            div.className = `draggable-card flex-grow rounded-xl p-3 bg-gradient-to-r from-slate-800 to-slate-900 border ${
+                isSelected ? 'border-amber-400 ring-2 ring-amber-400/50' : 'border-cyan-500/40 hover:border-cyan-300'
+            } flex items-center justify-between gap-3 shadow-md`;
+            div.draggable = true;
+
+            div.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('text/plain', item.id.toString());
+            });
+
+            if (!isPlaced) {
+                div.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playUiBeep(720);
+                    selectedBankCardId = (selectedBankCardId === item.id) ? null : item.id;
+                    // Render semula dengan susunan bank semasa
+                    const currentBankOrder = getCurrentBankOrder();
+                    renderQuizBoard(currentBankOrder);
+                });
+            }
+
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-mata-blue shrink-0">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div>
+                        <div class="font-orbitron font-bold text-xs sm:text-sm text-white">${item.title.replace(/LANGKAH \d+: /, '')}</div>
+                        <div class="text-[11px] text-slate-300 line-clamp-1">${item.targetLabel}</div>
+                    </div>
+                </div>
+                ${isPlaced 
+                    ? `<button type="button" onclick="removeCardFromSlot(${slotIndex}); event.stopPropagation();" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-mata-red text-xs font-bold" title="Keluarkan kad"><i class="fa-solid fa-xmark"></i></button>`
+                    : `<i class="fa-solid fa-grip-vertical text-slate-500"></i>`
+                }
+            `;
+            return div;
+        }
+
+        function getCurrentBankOrder() {
+            // Mengekalkan susunan visual sedia ada semasa pilihan klik
+            const bankCards = Array.from(document.querySelectorAll('#quiz-card-bank .draggable-card'));
+            if (bankCards.length === 0) return WUDUK_STEPS;
+            const titles = bankCards.map(el => el.querySelector('.font-orbitron').textContent.trim());
+            const ordered = [];
+            titles.forEach(t => {
+                const found = WUDUK_STEPS.find(s => s.title.replace(/LANGKAH \d+: /, '') === t);
+                if (found) ordered.push(found);
+            });
+            WUDUK_STEPS.forEach(s => {
+                if (!ordered.includes(s)) ordered.push(s);
+            });
+            return ordered;
+        }
+
+        function assignCardToSlot(cardId, targetSlotIndex) {
+            playUiBeep(800);
+            // Jika kad sudah berada di slot lain, kosongkan slot lama
+            const existingIdx = slotAssignments.indexOf(cardId);
+            if (existingIdx !== -1) {
+                slotAssignments[existingIdx] = null;
+            }
+            slotAssignments[targetSlotIndex] = cardId;
+            renderQuizBoard(getCurrentBankOrder());
+        }
+
+        function removeCardFromSlot(slotIndex) {
+            playUiBeep(500);
+            slotAssignments[slotIndex] = null;
+            renderQuizBoard(getCurrentBankOrder());
+        }
+
+        function checkQuizAnswers() {
+            if (slotAssignments.includes(null)) {
+                playUiBeep(350);
+                showToast("Sila lengkapkan kesemua 6 slot urutan terlebih dahulu sebelum menyemak jawapan!");
+                return;
+            }
+
+            let correctCount = 0;
+            const slotDivs = document.querySelectorAll('#quiz-slots-container .drop-zone');
+
+            slotAssignments.forEach((assignedId, idx) => {
+                const isCorrect = (assignedId === idx + 1);
+                if (isCorrect) {
+                    correctCount++;
+                    slotDivs[idx].classList.remove('border-slate-700', 'border-red-500');
+                    slotDivs[idx].classList.add('border-emerald-400', 'bg-emerald-950/30');
+                } else {
+                    slotDivs[idx].classList.remove('border-slate-700', 'border-emerald-400');
+                    slotDivs[idx].classList.add('border-mata-red', 'bg-red-950/30');
+                }
+            });
+
+            const score = Math.round((correctCount / 6) * 100);
+            document.getElementById('quiz-score-display').textContent = `${score} / 100`;
+
+            const panel = document.getElementById('quiz-feedback-panel');
+            panel.classList.remove('hidden', 'bg-emerald-950/60', 'border-emerald-400', 'bg-red-950/60', 'border-mata-red');
+
+            if (correctCount === 6) {
+                playUiBeep(1040, "8n");
+                panel.classList.add('bg-emerald-950/60', 'border-emerald-400');
+                panel.innerHTML = `
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-3xl shrink-0">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <div class="space-y-1 text-center sm:text-left">
+                            <div class="font-orbitron font-bold text-emerald-300 text-base">SYABAS EJEN! KECEKAPAN 100% SEMPURNA!</div>
+                            <p class="text-sm text-slate-200">
+                                Ejen Ali: "Hebat! Anda berjaya menyusun keenam-enam rukun wuduk mengikut tertib yang betul: <strong>1. Niat, 2. Membasuh Seluruh Muka, 3. Membasuh Kedua-dua Tangan hingga Siku, 4. Menyapu Sebahagian Kepala, 5. Membasuh Kedua-dua Kaki hingga Buku Lali, dan 6. Tertib.</strong>"
+                            </p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('btn-to-summary').classList.remove('hidden');
+                speakText("Syabas ejen! Anda berjaya menyusun keenam-enam rukun wuduk mengikut tertib yang betul.");
+            } else {
+                playUiBeep(320, "8n");
+                panel.classList.add('bg-red-950/60', 'border-mata-red');
+                panel.innerHTML = `
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center text-mata-red text-3xl shrink-0">
+                                <i class="fa-solid fa-rotate"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="font-orbitron font-bold text-mata-red text-base">TERUSKAN USAHA EJEN! (${correctCount}/6 BETUL)</div>
+                                <p class="text-sm text-slate-200">
+                                    Ejen Bakar: "Jangan mengalah! Semak semula slot yang bertanda merah dan susun mengikut urutan rukun wuduk yang betul."
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="showCorrectAnswerOrder()" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 font-orbitron text-xs font-bold">
+                            PAPAR SUSUNAN BETUL
+                        </button>
+                    </div>
+                `;
+                speakText("Jangan mengalah ejen! Sila semak semula susunan rukun wuduk yang bertanda merah dan cuba lagi.");
+            }
+        }
+
+        function showCorrectAnswerOrder() {
+            playUiBeep(760);
+            slotAssignments = [1, 2, 3, 4, 5, 6];
+            renderQuizBoard(WUDUK_STEPS);
+            checkQuizAnswers();
+        }
+
+        // -------------------------------------------------------------------------
+        // 7. HALAMAN RUMUSAN MISI (INFOGRAFIK 6 RUKUN)
+        // -------------------------------------------------------------------------
+        function renderSummaryInfographic() {
+            const grid = document.getElementById('summary-infographic-grid');
+            grid.innerHTML = '';
+
+            WUDUK_STEPS.forEach(step => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400 rounded-2xl p-5 space-y-3 transition relative overflow-hidden';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-mata-red to-red-700 text-white font-orbitron font-black text-sm flex items-center justify-center shadow">
+                            ${step.id}
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/15 text-mata-blue flex items-center justify-center text-lg">
+                            <i class="fa-solid ${step.icon}"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-orbitron font-bold text-base text-white">
+                        ${step.title.replace(/LANGKAH \d+: /, '')}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        ${step.description}
+                    </p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function finishMission() {
+            playUiBeep(980);
+            showToast("Misi Khas MATA selesai! Kembali ke halaman utama Akademi.");
+            setTimeout(() => {
+                navigateTo('intro');
+            }, 900);
+        }
+
+        // -------------------------------------------------------------------------
+        // 8. INISIALISASI APABILA HALAMAN DIMUATKAN
+        // -------------------------------------------------------------------------
+        window.onload = function() {
+            init3DScene();
+            animate3D();
+            // Muatkan senarai suara pelayar lebih awal
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
+        };
+    </script>
+</body>
+</html>
